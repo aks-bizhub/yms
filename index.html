@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop Apps</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f4f6f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .container {
+    max-width: 480px;
+    width: 100%;
+  }
+  h1 {
+    text-align: center;
+    color: #1a1a2e;
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+  p.subtitle {
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+  .card {
+    display: block;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border-left: 5px solid #2563eb;
+  }
+  .card:active { transform: scale(0.98); }
+  .card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+  .card h2 {
+    font-size: 18px;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+  }
+  .card p {
+    font-size: 13px;
+    color: #6b7280;
+  }
+  .card.dairy { border-left-color: #10b981; }
+  .card.payment { border-left-color: #f59e0b; }
+  .card.ledger { border-left-color: #6366f1; }
+  footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Shop Apps</h1>
+    <p class="subtitle">Select a module to open</p>
+
+    <a class="card dairy" href="dairy/index.html">
+      <h2>🥛 Yogesh Dairy</h2>
+      <p>Milk collection & dairy management</p>
+    </a>
+
+    <a class="card payment" href="payment/index.html">
+      <h2>💳 Payment Module</h2>
+      <p>Record and track payments</p>
+    </a>
+
+    <a class="card ledger" href="ledger/index.html">
+      <h2>📒 Ledger</h2>
+      <p>Accounts & transaction ledger</p>
+    </a>
+
+    <footer>AKS FinSight Nexus</footer>
+  </div>
+</body>
+</html>
