@@ -647,6 +647,8 @@ let attDate = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0')+'
 let attMonth = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
 let expandedCards = new Set();
 let toastT;
+let curUser = null;          // { name, access, pin } — set after successful login
+const isViewer = () => curUser?.access === 'Viewer';
 
 // ══════════════════════════════════════
 //  BOOT
@@ -662,8 +664,6 @@ function boot() {
 //  LOGIN / ACCESS CONTROL
 // ══════════════════════════════════════
 // Sheet "User": User Name | Access ("Admin" | "Viewer") | PIN
-let curUser = null;          // { name, access }
-const isViewer = () => curUser?.access === 'Viewer';
 
 async function showLogin() {
   document.getElementById('login').style.display = 'block';
