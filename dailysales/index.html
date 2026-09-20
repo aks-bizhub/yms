@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Sales Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#ffffff; --primary:#1d5fa8; --primary-dark:#134a87;
+    --text:#1b2430; --muted:#6b7684; --border:#e2e6ea; --accent:#e8f1fb;
+    --danger:#c0392b; --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  .app{max-width:520px;margin:0 auto;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;}
+  header.topbar{background:var(--primary);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5;}
+  header.topbar h1{font-size:17px;margin:0;font-weight:600;}
+  header.topbar button{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;}
+  .screen{display:none;flex:1;padding:20px;}
+  .screen.active{display:block;}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px;}
+  .card h2{margin:0 0 14px;font-size:16px;color:var(--primary-dark);}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;}
+  input[type=text],input[type=password],input[type=number],input[type=date],select{
+    width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:#fff;
+  }
+  input[id=loginPassword]{letter-spacing:6px;font-size:20px;text-align:center;}
+  input:focus{outline:none;border-color:var(--primary);}
+  .btn{display:block;width:100%;padding:12px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:16px;}
+  .btn:active{background:var(--primary-dark);}
+  .btn.secondary{background:var(--accent);color:var(--primary-dark);}
+  .btn.link{background:none;color:var(--primary);font-weight:500;padding:6px;margin-top:8px;text-decoration:underline;}
+  .btn.small{width:auto;padding:8px 14px;font-size:13px;margin-top:0;}
+  .tabs{display:flex;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:56px;z-index:4;}
+  .tab{flex:1;text-align:center;padding:13px 0;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;}
+  .tab.active{color:var(--primary);font-weight:600;border-color:var(--primary);}
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10;align-items:flex-end;justify-content:center;}
+  .modal-bg.active{display:flex;}
+  .modal{background:#fff;width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:22px;max-height:88vh;overflow-y:auto;}
+  .modal h3{margin:0 0 4px;font-size:16px;}
+  .modal .sub{color:var(--muted);font-size:13px;margin-bottom:10px;}
+  .total-line{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--border);margin-top:10px;font-weight:700;color:var(--primary-dark);}
+  .row2{display:flex;gap:10px;}
+  .row2 > div{flex:1;}
+  .msg{font-size:13px;margin-top:10px;padding:8px 10px;border-radius:8px;}
+  .msg.error{background:#fbeceb;color:var(--danger);}
+  .msg.success{background:var(--accent);color:var(--primary-dark);}
+  .hidden{display:none !important;}
+  .preset-row{display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap;}
+  .preset-row button{flex:1;min-width:90px;padding:8px;font-size:12.5px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);cursor:pointer;}
+  .preset-row button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .summary-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);padding:4px 0;}
+  .summary-row b{color:var(--text);}
+  .foot-note{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;}
+  .missing-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:7px;background:#fff;}
+  .missing-row .m-label{font-size:14px;}
+  .retry-btn{background:#fff;border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:8px;font-size:13px;width:100%;margin-top:8px;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SETUP SCREEN: paste Apps Script Web App URL -->
+  <div id="screen-setup" class="screen active">
+    <div style="padding-top:14%;">
+      <div class="card">
+        <h2>Link Google Sheet</h2>
+        <p style="color:var(--muted);font-size:13.5px;margin:0 0 6px;">Paste the Apps Script Web App URL for your Sales spreadsheet.</p>
+        <label>Web App URL</label>
+        <input type="text" id="webAppUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="btn" onclick="saveWebAppUrl()">Continue</button>
+        <div id="setupMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN SCREEN -->
+  <div id="screen-login" class="screen">
+    <div style="padding-top:14%;">
+      <div class="card">
+        <h2>Sign In</h2>
+        <label>User</label>
+        <select id="loginUserId"><option value="">Loading users…</option></select>
+        <label>PIN</label>
+        <input type="password" id="loginPassword" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••" oninput="sanitizePin(this)">
+        <button class="btn" onclick="doLogin()">Sign In</button>
+        <button class="btn link" onclick="showScreen('setup')">Change linked sheet</button>
+        <div id="loginMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="screen-main" class="screen">
+    <header class="topbar">
+      <h1>Daily Sales Tracker</h1>
+      <button onclick="logout()">Logout</button>
+    </header>
+    <div class="tabs">
+      <div class="tab active" data-tab="entry" onclick="switchTab('entry')">Entry</div>
+      <div class="tab" data-tab="reports" onclick="switchTab('reports')">Reports</div>
+    </div>
+
+    <!-- ENTRY TAB -->
+    <div id="tab-entry" class="screen active" style="padding:16px;">
+      <div class="card">
+        <h2>Add / Edit Entry</h2>
+        <p style="color:var(--muted);font-size:13px;margin:0;">Pick any date — current month or otherwise — and enter its sales.</p>
+        <label>Date</label>
+        <input type="date" id="quickEntryDate">
+        <button class="btn" onclick="startQuickEntry()">Add Entry for this Date</button>
+      </div>
+
+      <div class="card">
+        <h2>Find Missing Entries</h2>
+        <p style="color:var(--muted);font-size:13px;margin:0;">Check a period for dates with no entry yet, and fill them in directly.</p>
+        <div class="preset-row">
+          <button id="mp-this" onclick="setMissingPreset('this')">This Month</button>
+          <button id="mp-last7" onclick="setMissingPreset('last7')">Last 7 Days</button>
+          <button id="mp-custom" onclick="setMissingPreset('custom')">Custom</button>
+        </div>
+        <div class="row2">
+          <div><label>Start Date</label><input type="date" id="missStart"></div>
+          <div><label>End Date</label><input type="date" id="missEnd"></div>
+        </div>
+        <button class="btn secondary" onclick="findMissingDates()">Find Missing Dates</button>
+        <div id="missingMsg"></div>
+        <div id="missingList" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <!-- REPORTS TAB -->
+    <div id="tab-reports" class="screen" style="padding:16px;">
+      <div class="card">
+        <h2>Download Report</h2>
+        <div class="preset-row">
+          <button id="preset-this" onclick="setPreset('this')">This Month</button>
+          <button id="preset-last" onclick="setPreset('last')">Last Month</button>
+          <button id="preset-custom" onclick="setPreset('custom')">Custom</button>
+        </div>
+        <div class="row2">
+          <div>
+            <label>Start Date</label>
+            <input type="date" id="repStart">
+          </div>
+          <div>
+            <label>End Date</label>
+            <input type="date" id="repEnd">
+          </div>
+        </div>
+        <button class="btn secondary" onclick="previewReport()">Preview</button>
+        <div id="reportPreview" style="margin-top:12px;"></div>
+        <button class="btn" onclick="downloadReport()">Download Excel</button>
+        <div id="reportMsg"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ENTRY MODAL -->
+<div class="modal-bg" id="entryModalBg">
+  <div class="modal">
+    <h3 id="modalDateLabel">Entry</h3>
+    <div class="sub">Enter sales figures for this date</div>
+    <input type="hidden" id="modalDateActual">
+    <label>Date</label>
+    <input type="date" id="modalDatePicker" onchange="onModalDateChange()">
+    <label>Milk etc.</label>
+    <input type="number" id="modalMilk" min="0" step="0.01" oninput="recalcModalTotal()">
+    <label>Ice-cream</label>
+    <input type="number" id="modalIceCream" min="0" step="0.01" oninput="recalcModalTotal()">
+    <label>Sweet</label>
+    <input type="number" id="modalSweet" min="0" step="0.01" oninput="recalcModalTotal()">
+    <div class="total-line"><span>Total Sales</span><span id="modalTotal">0.00</span></div>
+    <button class="btn" onclick="saveModalEntry()">Save Entry</button>
+    <button class="btn link" onclick="closeModal()">Cancel</button>
+    <div id="modalMsg"></div>
+  </div>
+</div>
+
+<script>
+/* ---------------- CONFIG / STATE ---------------- */
+let webAppUrl = localStorage.getItem('dst_webAppUrl') || '';
+let currentUser = localStorage.getItem('dst_userId') || '';
+let currentMissingPreset = 'this';
+let currentReportPreset = 'this';
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>{
+    if (s.id.startsWith('screen-')) s.classList.remove('active');
+  });
+  document.getElementById('screen-'+name).classList.add('active');
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  document.getElementById('tab-entry').classList.toggle('active', name==='entry');
+  document.getElementById('tab-reports').classList.toggle('active', name==='reports');
+  if (name==='reports' && !document.getElementById('repStart').value) setPreset('this');
+}
+
+/* ---------------- ROBUST API CALL (timeout + auto-retry + clear errors) ---------------- */
+function callApiWithRetry(payload, attemptsLeft){
+  if (attemptsLeft === undefined) attemptsLeft = 2;
+  return new Promise((resolve, reject)=>{
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(), 20000);
+
+    fetch(webAppUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight on Apps Script
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    })
+    .then(r => r.text())
+    .then(text => {
+      clearTimeout(timer);
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error('The Web App did not return valid data. Check that the deployment access is set to "Anyone" and that you redeployed after any edits.');
+      }
+      resolve(data);
+    })
+    .catch(err => {
+      clearTimeout(timer);
+      if (attemptsLeft > 1 && err.name !== 'SyntaxError') {
+        setTimeout(()=> callApiWithRetry(payload, attemptsLeft - 1).then(resolve).catch(reject), 1200);
+      } else {
+        const message = err.name === 'AbortError'
+          ? 'Request timed out — the sheet is taking too long to respond. Please try again.'
+          : (err.message || 'Network error. Check your connection and the Web App URL.');
+        reject(new Error(message));
+      }
+    });
+  });
+}
+
+/* ---------------- SETUP / LOGIN ---------------- */
+function saveWebAppUrl(){
+  const url = document.getElementById('webAppUrlInput').value.trim();
+  const msg = document.getElementById('setupMsg');
+  if (!url.startsWith('https://script.google.com/')) {
+    msg.innerHTML = '<div class="msg error">Please paste a valid Apps Script Web App URL.</div>';
+    return;
+  }
+  webAppUrl = url;
+  localStorage.setItem('dst_webAppUrl', url);
+  msg.innerHTML = '';
+  showScreen('login');
+  loadUsersDropdown();
+}
+
+function sanitizePin(el){
+  el.value = el.value.replace(/\D/g, '').slice(0, 6);
+}
+
+function loadUsersDropdown(){
+  const select = document.getElementById('loginUserId');
+  const cacheKey = 'dst_users_cache';
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try { populateUserSelect(JSON.parse(cached)); } catch(e){ select.innerHTML = '<option value="">Loading users…</option>'; }
+  } else {
+    select.innerHTML = '<option value="">Loading users…</option>';
+  }
+  callApiWithRetry({ action:'getUsers' }).then(res=>{
+    if (res.success) {
+      localStorage.setItem(cacheKey, JSON.stringify(res.users));
+      populateUserSelect(res.users);
+    } else if (!cached) {
+      select.innerHTML = '<option value="">Could not load users</option>';
+    }
+  }).catch(err=>{
+    if (!cached) {
+      select.innerHTML = '<option value="">Could not load users</option>';
+      document.getElementById('loginMsg').innerHTML = '<div class="msg error">'+err.message+'</div>'
+        + '<button class="retry-btn" onclick="loadUsersDropdown()">Retry</button>';
+    }
+  });
+}
+
+function populateUserSelect(users){
+  const select = document.getElementById('loginUserId');
+  const prevVal = select.value;
+  select.innerHTML = '';
+  if (!users || !users.length) {
+    select.innerHTML = '<option value="">No users found</option>';
+    return;
+  }
+  users.forEach(u=>{
+    const opt = document.createElement('option');
+    opt.value = u; opt.innerText = u;
+    select.appendChild(opt);
+  });
+  if (prevVal && users.includes(prevVal)) select.value = prevVal;
+}
+
+function doLogin(){
+  const userId = document.getElementById('loginUserId').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const msg = document.getElementById('loginMsg');
+  if (!userId || !password) { msg.innerHTML = '<div class="msg error">Choose a user and enter your PIN.</div>'; return; }
+  msg.innerHTML = '<div class="msg">Signing in…</div>';
+  callApiWithRetry({ action:'login', userId, password }).then(res=>{
+    if (res.success) {
+      currentUser = res.userId;
+      localStorage.setItem('dst_userId', currentUser);
+      msg.innerHTML = '';
+      showScreen('main');
+    } else {
+      msg.innerHTML = '<div class="msg error">'+(res.message||'Login failed')+'</div>';
+    }
+  }).catch(err=> msg.innerHTML = '<div class="msg error">'+err.message+'</div>');
+}
+
+function logout(){
+  currentUser = '';
+  localStorage.removeItem('dst_userId');
+  document.getElementById('loginPassword').value = '';
+  showScreen('login');
+  loadUsersDropdown();
+}
+
+/* ---------------- ENTRY: QUICK ADD FOR A CHOSEN DATE ---------------- */
+function fmtDate(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function parseInputDate(s){ const p = s.split('-'); return new Date(Number(p[0]), Number(p[1])-1, Number(p[2])); }
+
+function startQuickEntry(){
+  const val = document.getElementById('quickEntryDate').value;
+  if (!val) { alert('Pick a date first.'); return; }
+  openEntryModal(parseInputDate(val));
+}
+
+/* ---------------- ENTRY MODAL ---------------- */
+function openEntryModal(dateObj){
+  const key = fmtDate(dateObj);
+  document.getElementById('modalDatePicker').value = key;
+  document.getElementById('modalDateActual').value = key;
+  document.getElementById('modalDateLabel').innerText = 'Entry — ' + dateObj.toDateString();
+  document.getElementById('modalMilk').value = '';
+  document.getElementById('modalIceCream').value = '';
+  document.getElementById('modalSweet').value = '';
+  recalcModalTotal();
+  document.getElementById('entryModalBg').classList.add('active');
+  prefillModalForDate(key);
+}
+
+function onModalDateChange(){
+  const val = document.getElementById('modalDatePicker').value;
+  if (!val) return;
+  document.getElementById('modalDateActual').value = val;
+  document.getElementById('modalDateLabel').innerText = 'Entry — ' + parseInputDate(val).toDateString();
+  document.getElementById('modalMilk').value = '';
+  document.getElementById('modalIceCream').value = '';
+  document.getElementById('modalSweet').value = '';
+  recalcModalTotal();
+  prefillModalForDate(val);
+}
+
+function prefillModalForDate(key){
+  const msg = document.getElementById('modalMsg');
+  msg.innerHTML = '<div class="msg">Checking existing entry…</div>';
+  callApiWithRetry({ action:'getEntries', startDate:key, endDate:key }).then(res=>{
+    msg.innerHTML = '';
+    if (res.success && res.entries.length) {
+      const e = res.entries[0];
+      document.getElementById('modalMilk').value = e.milk;
+      document.getElementById('modalIceCream').value = e.iceCream;
+      document.getElementById('modalSweet').value = e.sweet;
+      recalcModalTotal();
+    }
+  }).catch(err=>{
+    msg.innerHTML = '<div class="msg error">Could not check existing data — you can still enter and save fresh figures. ('+err.message+')</div>';
+  });
+}
+
+function recalcModalTotal(){
+  const m = parseFloat(document.getElementById('modalMilk').value)||0;
+  const i = parseFloat(document.getElementById('modalIceCream').value)||0;
+  const s = parseFloat(document.getElementById('modalSweet').value)||0;
+  document.getElementById('modalTotal').innerText = '₹'+(m+i+s).toFixed(2);
+}
+
+function closeModal(){ document.getElementById('entryModalBg').classList.remove('active'); }
+
+function saveModalEntry(){
+  const dateActual = document.getElementById('modalDateActual').value;
+  const milk = document.getElementById('modalMilk').value || 0;
+  const iceCream = document.getElementById('modalIceCream').value || 0;
+  const sweet = document.getElementById('modalSweet').value || 0;
+  const msg = document.getElementById('modalMsg');
+  msg.innerHTML = '<div class="msg">Saving…</div>';
+  callApiWithRetry({ action:'saveEntry', dateActual, milk, iceCream, sweet }).then(res=>{
+    if (res.success) {
+      msg.innerHTML = '<div class="msg success">Saved.</div>';
+      setTimeout(()=>{ closeModal(); }, 500);
+    } else {
+      msg.innerHTML = '<div class="msg error">'+(res.message||'Save failed')+'</div>';
+    }
+  }).catch(err=> msg.innerHTML = '<div class="msg error">'+err.message+'</div>');
+}
+
+/* ---------------- ENTRY: MISSING-DATES FINDER ---------------- */
+function pad(n){ return String(n).padStart(2,'0'); }
+function toInputDate(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+
+function setMissingPreset(name){
+  currentMissingPreset = name;
+  document.querySelectorAll('#tab-entry .preset-row button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mp-'+name).classList.add('active');
+  const today = new Date();
+  let start, end;
+  if (name==='this') {
+    start = new Date(today.getFullYear(), today.getMonth(), 1);
+    end = today;
+  } else if (name==='last7') {
+    end = today;
+    start = new Date(today.getFullYear(), today.getMonth(), today.getDate()-6);
+  } else {
+    return; // custom: leave dates for manual entry
+  }
+  document.getElementById('missStart').value = toInputDate(start);
+  document.getElementById('missEnd').value = toInputDate(end);
+  document.getElementById('missingList').innerHTML = '';
+}
+
+function findMissingDates(){
+  const start = document.getElementById('missStart').value;
+  const end = document.getElementById('missEnd').value;
+  const msg = document.getElementById('missingMsg');
+  const list = document.getElementById('missingList');
+  list.innerHTML = '';
+  if (!start || !end) { msg.innerHTML = '<div class="msg error">Pick both dates.</div>'; return; }
+  msg.innerHTML = '<div class="foot-note">Checking…</div>';
+
+  callApiWithRetry({ action:'getEntries', startDate:start, endDate:end }).then(res=>{
+    if (!res.success) { throw new Error(res.message || 'Failed to load entries'); }
+    const present = new Set(res.entries.map(e=>e.dateActual));
+    const missing = [];
+    const s = parseInputDate(start), e = parseInputDate(end);
+    for (let d = new Date(s); d <= e; d.setDate(d.getDate()+1)) {
+      const key = fmtDate(d);
+      if (!present.has(key)) missing.push(new Date(d));
+    }
+    if (!missing.length) {
+      msg.innerHTML = '<div class="msg success">All dates in this period have an entry.</div>';
+      return;
+    }
+    msg.innerHTML = '<div class="foot-note">'+missing.length+' date(s) with no entry:</div>';
+    missing.forEach(d=>{
+      const row = document.createElement('div');
+      row.className = 'missing-row';
+      row.innerHTML = `<span class="m-label">${d.toDateString()}</span>`;
+      const btn = document.createElement('button');
+      btn.className = 'btn small';
+      btn.innerText = '+ Add';
+      btn.onclick = () => openEntryModal(d);
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+  }).catch(err=>{
+    msg.innerHTML = '<div class="msg error">'+err.message+'</div>'
+      + '<button class="retry-btn" onclick="findMissingDates()">Retry</button>';
+  });
+}
+
+/* ---------------- REPORTS TAB ---------------- */
+function setPreset(name){
+  currentReportPreset = name;
+  document.querySelectorAll('#tab-reports .preset-row button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('preset-'+name).classList.add('active');
+  const today = new Date();
+  let start, end;
+  if (name==='this') {
+    start = new Date(today.getFullYear(), today.getMonth(), 1);
+    end = new Date(today.getFullYear(), today.getMonth()+1, 0);
+  } else if (name==='last') {
+    start = new Date(today.getFullYear(), today.getMonth()-1, 1);
+    end = new Date(today.getFullYear(), today.getMonth(), 0);
+  } else {
+    return; // custom: leave dates as-is for manual entry
+  }
+  document.getElementById('repStart').value = toInputDate(start);
+  document.getElementById('repEnd').value = toInputDate(end);
+  document.getElementById('reportPreview').innerHTML = '';
+}
+
+function previewReport(){
+  const start = document.getElementById('repStart').value;
+  const end = document.getElementById('repEnd').value;
+  const box = document.getElementById('reportPreview');
+  if (!start || !end) { box.innerHTML = '<div class="msg error">Pick both dates.</div>'; return; }
+  box.innerHTML = '<div class="foot-note">Loading…</div>';
+  callApiWithRetry({ action:'getEntries', startDate:start, endDate:end }).then(res=>{
+    if (!res.success) { throw new Error(res.message || 'Failed to load'); }
+    const totalDays = res.entries.length;
+    const grand = res.entries.reduce((sum,e)=>sum+e.total,0);
+    box.innerHTML = `
+      <div class="summary-row"><span>Entries found</span><b>${totalDays}</b></div>
+      <div class="summary-row"><span>Total Sales</span><b>₹${grand.toFixed(2)}</b></div>`;
+  }).catch(err=>{
+    box.innerHTML = '<div class="msg error">'+err.message+'</div>'
+      + '<button class="retry-btn" onclick="previewReport()">Retry</button>';
+  });
+}
+
+function downloadReport(){
+  const start = document.getElementById('repStart').value;
+  const end = document.getElementById('repEnd').value;
+  const msg = document.getElementById('reportMsg');
+  if (!start || !end) { msg.innerHTML = '<div class="msg error">Pick both dates.</div>'; return; }
+  if (typeof XLSX === 'undefined') {
+    msg.innerHTML = '<div class="msg error">Excel library failed to load. Check your internet connection and reload the page.</div>'
+      + '<button class="retry-btn" onclick="downloadReport()">Retry</button>';
+    return;
+  }
+  msg.innerHTML = '<div class="msg">Preparing file…</div>';
+
+  callApiWithRetry({ action:'getEntries', startDate:start, endDate:end }).then(res=>{
+    if (!res.success) { throw new Error(res.message || 'Failed to load entries'); }
+    if (!res.entries.length) { msg.innerHTML = '<div class="msg error">No entries in this period.</div>'; return; }
+
+    const rows = res.entries.map(e => ({
+      'Date': e.dateDisplay,
+      'Milk etc.': e.milk,
+      'Ice-cream': e.iceCream,
+      'Sweet': e.sweet,
+      'Total Sales': e.total
+    }));
+    const grand = res.entries.reduce((s,e)=>s+e.total,0);
+    rows.push({ 'Date':'TOTAL', 'Milk etc.':'', 'Ice-cream':'', 'Sweet':'', 'Total Sales': grand });
+
+    try {
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = [{wch:14},{wch:12},{wch:12},{wch:10},{wch:14}];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sales Report');
+      XLSX.writeFile(wb, `Sales_Report_${start}_to_${end}.xlsx`);
+      msg.innerHTML = '<div class="msg success">Downloaded.</div>';
+    } catch (e) {
+      throw new Error('Could not build the Excel file: ' + e.message);
+    }
+  }).catch(err=>{
+    msg.innerHTML = '<div class="msg error">'+err.message+'</div>'
+      + '<button class="retry-btn" onclick="downloadReport()">Retry</button>';
+  });
+}
+
+/* ---------------- INIT ---------------- */
+(function init(){
+  document.getElementById('quickEntryDate').value = toInputDate(new Date());
+  setMissingPreset('this');
+  if (webAppUrl) {
+    document.getElementById('webAppUrlInput').value = webAppUrl;
+    if (currentUser) {
+      showScreen('main');
+    } else {
+      showScreen('login');
+      loadUsersDropdown();
+    }
+  } else {
+    showScreen('setup');
+  }
+})();
+</script>
+</body>
+</html>
