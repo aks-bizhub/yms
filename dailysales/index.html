@@ -70,6 +70,7 @@
         <label>Web App URL</label>
         <input type="text" id="webAppUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
         <button class="btn" onclick="saveWebAppUrl()">Continue</button>
+        <button class="btn secondary" onclick="testConnection()">Test Connection</button>
         <div id="setupMsg"></div>
       </div>
     </div>
@@ -202,11 +203,13 @@ function switchTab(name){
 }
 
 /* ---------------- ROBUST API CALL (timeout + auto-retry + clear errors) ---------------- */
+const API_TIMEOUT_MS = 12000;
+
 function callApiWithRetry(payload, attemptsLeft){
   if (attemptsLeft === undefined) attemptsLeft = 2;
   return new Promise((resolve, reject)=>{
     const controller = new AbortController();
-    const timer = setTimeout(()=>controller.abort(), 20000);
+    const timer = setTimeout(()=>controller.abort(), API_TIMEOUT_MS);
 
     fetch(webAppUrl, {
       method: 'POST',
@@ -221,21 +224,62 @@ function callApiWithRetry(payload, attemptsLeft){
       try {
         data = JSON.parse(text);
       } catch (e) {
-        throw new Error('The Web App did not return valid data. Check that the deployment access is set to "Anyone" and that you redeployed after any edits.');
+        throw new Error('The Web App did not return valid data. In Apps Script, check Deploy > Manage deployments — access should be set to "Anyone" (not "Anyone with Google account"), then redeploy.');
       }
       resolve(data);
     })
     .catch(err => {
       clearTimeout(timer);
       if (attemptsLeft > 1 && err.name !== 'SyntaxError') {
-        setTimeout(()=> callApiWithRetry(payload, attemptsLeft - 1).then(resolve).catch(reject), 1200);
+        setTimeout(()=> callApiWithRetry(payload, attemptsLeft - 1).then(resolve).catch(reject), 800);
       } else {
         const message = err.name === 'AbortError'
-          ? 'Request timed out — the sheet is taking too long to respond. Please try again.'
+          ? 'Request timed out. Use "Test Connection" on the setup screen to check your deployment settings.'
           : (err.message || 'Network error. Check your connection and the Web App URL.');
         reject(new Error(message));
       }
     });
+  });
+}
+
+function testConnection(){
+  const url = document.getElementById('webAppUrlInput').value.trim();
+  const msg = document.getElementById('setupMsg');
+  if (!url.startsWith('https://script.google.com/')) {
+    msg.innerHTML = '<div class="msg error">Paste a valid Apps Script Web App URL first.</div>';
+    return;
+  }
+  msg.innerHTML = '<div class="msg">Testing…</div>';
+  const started = Date.now();
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), API_TIMEOUT_MS);
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action:'ping' }),
+    signal: controller.signal
+  }).then(r=>r.text()).then(text=>{
+    clearTimeout(timer);
+    const ms = Date.now() - started;
+    let data;
+    try { data = JSON.parse(text); }
+    catch(e){
+      msg.innerHTML = '<div class="msg error">Reached the URL in '+ms+'ms but got a non-JSON reply. This almost always means "Who has access" is not set to "Anyone" — open Apps Script &gt; Deploy &gt; Manage deployments, fix the access setting, and redeploy.</div>';
+      return;
+    }
+    if (data.success) {
+      const note = ms > 4000
+        ? ' That is slower than expected — double check "Execute as: Me" and "Who has access: Anyone" in your deployment, and that the Sales sheet is not unusually large.'
+        : '';
+      msg.innerHTML = '<div class="msg success">Connected in '+ms+'ms.'+note+'</div>';
+    } else {
+      msg.innerHTML = '<div class="msg error">Reached the sheet but it returned an error: '+(data.message||'unknown')+'</div>';
+    }
+  }).catch(err=>{
+    clearTimeout(timer);
+    const ms = Date.now() - started;
+    const reason = err.name === 'AbortError' ? ('timed out after '+ms+'ms') : (err.message || 'network error');
+    msg.innerHTML = '<div class="msg error">Could not connect ('+reason+'). Check the URL, that the deployment is active, and that "Who has access" is set to "Anyone".</div>';
   });
 }
 
@@ -364,7 +408,7 @@ function onModalDateChange(){
 function prefillModalForDate(key){
   const msg = document.getElementById('modalMsg');
   msg.innerHTML = '<div class="msg">Checking existing entry…</div>';
-  callApiWithRetry({ action:'getEntries', startDate:key, endDate:key }).then(res=>{
+  callApiWithRetry({ action:'getEntries', startDate:key, endDate:key }, 1).then(res=>{
     msg.innerHTML = '';
     if (res.success && res.entries.length) {
       const e = res.entries[0];
