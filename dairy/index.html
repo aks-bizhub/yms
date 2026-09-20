@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yogesh Dairy Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3245;
+  --accent: #f5a623; --green: #34d399; --red: #f87171; --blue: #60a5fa;
+  --purple: #a78bfa; --text: #f0f0f5; --muted: #6b7280;
+  --cow: #f5a623; --buffalo: #60a5fa; --morning: #fbbf24; --evening: #818cf8;
+  --radius: 14px; --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* LOGIN */
+#login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.login-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 28px; width: 100%; max-width: 340px; text-align: center; }
+.login-logo { font-size: 48px; margin-bottom: 10px; }
+.login-box h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+.login-box p { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.pin-dots { display: flex; justify-content: center; gap: 14px; margin-bottom: 28px; }
+.pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); background: transparent; transition: all 0.2s; }
+.pin-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px rgba(245,166,35,0.5); }
+.pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 240px; margin: 0 auto; }
+.pin-key { padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); cursor: pointer; transition: all 0.15s; user-select: none; }
+.pin-key:hover { background: var(--border); } .pin-key:active { transform: scale(0.93); }
+.pin-key.del { font-size: 14px; color: var(--muted); } .pin-key.zero { grid-column: 2; }
+.pin-error { color: var(--red); font-size: 12px; margin-top: 14px; min-height: 18px; font-weight: 600; }
+.pin-hint { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+/* HEADER */
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 200; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-box { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), #e8841a); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+header h1 { font-size: 17px; font-weight: 800; } header p { font-size: 11px; color: var(--muted); }
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.sync-btn { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-family: 'Sora', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.sync-btn.connected { border-color: var(--green); color: var(--green); }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+.sync-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.lock-btn { padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'Sora', sans-serif; transition: all 0.2s; }
+.lock-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* TABS */
+.tabs { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; padding: 0 4px; position: sticky; top: 57px; z-index: 199; }
+.tab-btn { padding: 13px 15px; border: none; background: none; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+
+main { padding: 16px; max-width: 720px; margin: 0 auto; }
+.section { display: none; } .section.active { display: block; }
+
+.loading-screen { text-align: center; padding: 50px 20px; }
+.spinner-big { width: 38px; height: 38px; border: 3px solid rgba(245,166,35,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-screen p { color: var(--muted); font-size: 13px; }
+
+.banner { background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.3); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.banner button { margin-left: auto; flex-shrink: 0; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+.card-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+.form-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.form-group { flex: 1; min-width: 130px; }
+label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
+input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); font-family: 'Sora', sans-serif; font-size: 13px; transition: border-color 0.2s; }
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+input::placeholder { color: var(--muted); } select option { background: var(--surface2); }
+
+.btn { padding: 10px 20px; border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--accent); color: #1a0f00; } .btn-primary:hover { background: #f5b840; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); } .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-green { background: var(--green); color: #001a10; } .btn-green:hover { background: #4ade80; }
+.btn-danger { background: transparent; border: 1px solid var(--border); color: var(--red); }
+.btn-sm { padding: 6px 12px; font-size: 11px; } .btn-block { width: 100%; justify-content: center; }
+
+.sub-tabs { display: flex; gap: 6px; margin-bottom: 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px; }
+.sub-tab-btn { flex: 1; padding: 9px 8px; border: none; border-radius: 6px; background: none; font-family: 'Sora', sans-serif; font-weight: 600; font-size: 12px; color: var(--muted); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.sub-tab-btn.active { background: var(--surface); color: var(--accent); border: 1px solid var(--border); }
+
+.vendor-item { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 10px; background: var(--surface2); transition: border-color 0.2s; }
+.vendor-item:hover { border-color: rgba(245,166,35,0.3); }
+.vendor-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), #c47a10); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #1a0f00; flex-shrink: 0; }
+.vendor-info { flex: 1; } .vendor-name { font-weight: 700; font-size: 14px; }
+.vendor-meta { font-size: 11px; color: var(--muted); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+.rate-tag { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.rate-cow { background: rgba(245,166,35,0.15); color: var(--cow); border: 1px solid rgba(245,166,35,0.3); }
+.rate-buffalo { background: rgba(96,165,250,0.15); color: var(--buffalo); border: 1px solid rgba(96,165,250,0.3); }
+
+.session-toggle { display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 16px; gap: 4px; }
+.sess-btn { flex: 1; padding: 9px; border: none; border-radius: 6px; background: none; font-family: 'Sora', sans-serif; font-weight: 600; font-size: 13px; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+.sess-btn.morning.active { background: rgba(251,191,36,0.15); color: var(--morning); }
+.sess-btn.evening.active { background: rgba(129,140,248,0.15); color: var(--evening); }
+
+.vendor-entry { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 13px 15px; margin-bottom: 10px; }
+.vendor-entry.locked { border-color: rgba(52,211,153,0.25); }
+.vendor-entry-header { font-weight: 700; font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.entry-fields { display: flex; gap: 10px; flex-wrap: wrap; }
+.entry-field { flex: 1; min-width: 100px; }
+.entry-field label { font-size: 10px; }
+.milk-input-wrap { position: relative; }
+.milk-input-wrap input { padding-right: 28px; }
+.milk-unit { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--muted); pointer-events: none; }
+.saved-val { padding: 10px 12px; background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2); border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; color: var(--green); }
+.locked-badge { font-size: 10px; background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.2); padding: 2px 8px; border-radius: 20px; margin-left: auto; }
+
+.cycle-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.3); color: var(--accent); font-size: 12px; font-weight: 700; margin-bottom: 16px; }
+
+.payment-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden; }
+.payment-header { padding: 13px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.15s; }
+.payment-header:hover { background: rgba(255,255,255,0.02); }
+.payment-body { padding: 0 15px 15px; border-top: 1px solid var(--border); }
+.payment-stat { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.payment-stat:last-child { border-bottom: none; }
+.payment-stat .lbl { color: var(--muted); } .payment-stat .val { font-weight: 600; }
+.amount-big { font-size: 22px; font-weight: 800; color: var(--accent); }
+.paid-tag { color: var(--green); font-size: 11px; font-weight: 700; }
+.pending-tag { color: var(--morning); font-size: 11px; font-weight: 700; }
+
+.stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+.stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
+.stat-num { font-size: 24px; font-weight: 800; }
+.stat-num.accent { color: var(--accent); } .stat-num.green { color: var(--green); }
+.stat-num.blue { color: var(--blue); } .stat-num.purple { color: var(--purple); }
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th { text-align: left; padding: 8px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 600; }
+.data-table td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.badge-morning { background: rgba(251,191,36,0.15); color: var(--morning); }
+.badge-evening { background: rgba(129,140,248,0.15); color: var(--evening); }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; }
+.modal h3 { font-size: 16px; font-weight: 800; margin-bottom: 16px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface2); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 9998; transition: transform 0.3s ease; white-space: nowrap; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: var(--green); color: var(--green); }
+.toast.error { border-color: var(--red); color: var(--red); }
+
+.setup-panel { background: rgba(245,166,35,0.06); border: 1px solid rgba(245,166,35,0.25); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+.step { display: flex; gap: 12px; margin-bottom: 10px; }
+.step-num { width: 22px; height: 22px; background: var(--accent); color: #1a0f00; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+.step-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.step-text strong { color: var(--text); }
+code { background: var(--surface2); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-family: monospace; color: var(--accent); }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.empty { text-align: center; padding: 36px 20px; color: var(--muted); }
+.empty .ico { font-size: 36px; margin-bottom: 10px; }
+.empty p { font-size: 13px; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+.hidden { display: none !important; }
+
+.report-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.report-stat { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+.report-stat .rnum { font-size: 20px; font-weight: 800; }
+.report-stat .rlbl { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.day-row { display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.04); padding: 8px 10px; font-size: 12px; }
+.day-row:last-child { border-bottom: none; }
+.day-col { flex: 1; }
+.day-col.dc-date { font-weight: 600; min-width: 80px; }
+.day-col.dc-num { text-align: right; }
+.day-col.dc-amt { text-align: right; font-weight: 700; color: var(--accent); }
+.sub-hdr { display: flex; padding: 6px 10px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--surface2); border-radius: 6px 6px 0 0; }
+.sub-hdr .day-col.dc-num, .sub-hdr .day-col.dc-amt { text-align: right; }
+
+.sec-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.sec-item:last-child { border-bottom: none; }
+.sec-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.sec-text strong { color: var(--text); display: block; margin-bottom: 3px; font-size: 14px; }
+.sec-text span { color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+/* ROLE */
+.role-btn { display:flex; align-items:center; gap:14px; width:100%; padding:14px 18px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface2); color:var(--text); font-family:'Sora',sans-serif; cursor:pointer; transition:all 0.2s; text-align:left; }
+.role-btn:hover { border-color:var(--accent); background:rgba(245,166,35,0.08); }
+.role-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+.role-manager { background:rgba(245,166,35,0.15); color:var(--accent); border:1px solid rgba(245,166,35,0.3); }
+.role-operator { background:rgba(96,165,250,0.15); color:var(--blue); border:1px solid rgba(96,165,250,0.3); }
+
+/* TOGGLE BUTTON */
+.toggle-btn { padding:5px 12px; border-radius:20px; font-size:11px; font-family:'Sora',sans-serif; cursor:pointer; border:1px solid var(--border); background:var(--surface2); color:var(--muted); transition:all 0.2s; }
+.toggle-btn.toggle-on { background:rgba(52,211,153,0.12); border-color:var(--green); color:var(--green); }
+.toggle-btn:hover { border-color:var(--accent); }
+
+/* OUTSTANDING */
+.os-card { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:10px; overflow:hidden; }
+.os-header { display:flex; align-items:center; gap:12px; padding:13px 15px; cursor:pointer; }
+.os-header:hover { background:rgba(255,255,255,0.02); }
+.os-debit { color:var(--morning); } /* we owe vendor */
+.os-credit { color:var(--green); }  /* vendor overpaid / advance */
+.os-zero { color:var(--muted); }
+.os-body { padding:0 15px 14px; border-top:1px solid var(--border); }
+.ledger-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:12px; }
+.ledger-row:last-child { border-bottom:none; }
+.ledger-cycle { font-weight:700; font-size:11px; color:var(--muted); }
+.ledger-val { font-weight:700; text-align:right; }
+.ledger-total-row { display:flex; justify-content:space-between; align-items:center; padding:9px 12px; background:rgba(245,166,35,0.06); border-top:2px solid var(--border); font-size:13px; font-weight:800; border-radius:0 0 var(--radius-sm) var(--radius-sm); }
+.summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+.summary-box { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; text-align:center; }
+.summary-box .snum { font-size:18px; font-weight:800; }
+.summary-box .slbl { font-size:10px; color:var(--muted); margin-top:3px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🐄</div>
+    <h2>Yogesh Dairy</h2>
+
+    <!-- Step 1: Role Selection -->
+    <div id="role-step">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Select your role to continue</p>
+      <div style="display:flex;flex-direction:column;gap:10px;max-width:240px;margin:0 auto;">
+        <button class="role-btn" onclick="selectRole('manager')">
+          <span style="font-size:22px;">👔</span>
+          <div><div style="font-weight:800;font-size:15px;">Manager</div><div style="font-size:11px;opacity:0.7;">Full access</div></div>
+        </button>
+        <button class="role-btn" onclick="selectRole('operator')">
+          <span style="font-size:22px;">👷</span>
+          <div><div style="font-weight:800;font-size:15px;">Operator</div><div style="font-size:11px;opacity:0.7;">Collection entry only</div></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: PIN Entry -->
+    <div id="pin-step" class="hidden">
+      <p id="login-sub" style="font-size:13px;color:var(--muted);margin-bottom:20px;"></p>
+      <div class="pin-dots">
+        <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pp('1')">1</button>
+        <button class="pin-key" onclick="pp('2')">2</button>
+        <button class="pin-key" onclick="pp('3')">3</button>
+        <button class="pin-key" onclick="pp('4')">4</button>
+        <button class="pin-key" onclick="pp('5')">5</button>
+        <button class="pin-key" onclick="pp('6')">6</button>
+        <button class="pin-key" onclick="pp('7')">7</button>
+        <button class="pin-key" onclick="pp('8')">8</button>
+        <button class="pin-key" onclick="pp('9')">9</button>
+        <button class="pin-key zero" onclick="pp('0')">0</button>
+        <button class="pin-key del" onclick="pd()">⌫</button>
+      </div>
+      <div class="pin-error" id="pin-err"></div>
+      <button onclick="backToRoles()" style="margin-top:14px;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Sora',sans-serif;">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+<header>
+  <div class="header-left">
+    <div class="logo-box">🐄</div>
+    <div><h1>Yogesh Dairy</h1><p id="hdate"></p></div>
+    <span id="role-badge" class="role-badge role-manager" style="margin-left:4px;">👔 Manager</span>
+  </div>
+  <div class="header-actions">
+    <button class="sync-btn" id="sync-btn" onclick="openSettings()">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-lbl">Setup Sync</span>
+    </button>
+    <button class="lock-btn" onclick="lockApp()" title="Lock App">🔒</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" id="tab-btn-dashboard" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab-btn" id="tab-btn-vendors" onclick="switchTab('vendors',this)">👨‍🌾 Vendors</button>
+  <button class="tab-btn" id="tab-btn-collection" onclick="switchTab('collection',this)">🥛 Collection</button>
+  <button class="tab-btn" id="tab-btn-payments" onclick="switchTab('payments',this)">💰 Payments</button>
+  <button class="tab-btn" id="tab-btn-security" onclick="switchTab('security',this)">🔐 Security</button>
+</div>
+
+<main>
+
+<!-- DASHBOARD -->
+<div class="section active" id="tab-dashboard">
+  <div id="dash-content"><div class="loading-screen"><div class="spinner-big"></div><p>Loading data from Google Sheets...</p></div></div>
+</div>
+
+<!-- VENDORS -->
+<div class="section" id="tab-vendors">
+  <div class="sub-tabs">
+    <button class="sub-tab-btn active" id="vs-list-btn" onclick="vSub('list')">👨‍🌾 List</button>
+    <button class="sub-tab-btn" id="vs-add-btn" onclick="vSub('add')">➕ Add</button>
+    <button class="sub-tab-btn" id="vs-report-btn" onclick="vSub('report')">📊 Report</button>
+    <button class="sub-tab-btn" id="vs-outstanding-btn" onclick="vSub('outstanding')">⚖️ Outstanding</button>
+  </div>
+  <div id="vs-list">
+    <div class="card">
+      <div class="card-title"><span>👨‍🌾</span> Vendor List <span style="font-size:12px;color:var(--muted);font-weight:400;" id="vcount"></span></div>
+      <div id="vlist"><div class="loading-screen" style="padding:24px"><div class="spinner-big"></div><p>Loading...</p></div></div>
+    </div>
+  </div>
+  <div id="vs-add" class="hidden">
+    <div class="card">
+      <div class="card-title"><span>➕</span> Add New Vendor</div>
+      <div class="form-row">
+        <div class="form-group"><label>Vendor Name *</label><input type="text" id="vn" placeholder="e.g. Ramesh Patel"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="vph" placeholder="9876543210"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>🐄 Cow Rate (₹/L)</label><input type="number" id="vcr" placeholder="55" min="0" step="0.5"></div>
+        <div class="form-group"><label>🐃 Buffalo Rate (₹/L)</label><input type="number" id="vbr" placeholder="70" min="0" step="0.5"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Address</label><input type="text" id="vadr" placeholder="Village / Area"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addVendor()">➕ Add Vendor</button>
+    </div>
+  </div>
+  <div id="vs-report" class="hidden">
+    <div class="card">
+      <div class="card-title"><span>📊</span> Vendor Collection Report</div>
+      <div class="form-row">
+        <div class="form-group"><label>Vendor</label><select id="rv" onchange="renderReport()"><option value="">Select Vendor</option></select></div>
+        <div class="form-group"><label>Month</label>
+          <select id="rm" onchange="renderReport()"><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select>
+        </div>
+        <div class="form-group"><label>Year</label><input type="number" id="ry" onchange="renderReport()"></div>
+        <div class="form-group"><label>Cycle</label>
+          <select id="rc" onchange="renderReport()"><option value="0">All Cycles</option><option value="1">Cycle 1 (1–10)</option><option value="2">Cycle 2 (11–20)</option><option value="3">Cycle 3 (21–end)</option></select>
+        </div>
+      </div>
+    </div>
+    <div id="report-out"></div>
+  </div>
+
+  <!-- OUTSTANDING SECTION -->
+  <div id="vs-outstanding" class="hidden">
+    <div class="card">
+      <div class="card-title"><span>⚖️</span> Outstanding Balances</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">
+        Auto carry-forward: unpaid balance from previous cycles is added as opening balance. Advance payments reduce next cycle's dues.
+      </p>
+      <!-- View toggle -->
+      <div style="display:flex;gap:6px;margin-bottom:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;">
+        <button id="os-all-btn" class="sub-tab-btn active" onclick="osView('all')">👥 All Vendors</button>
+        <button id="os-single-btn" class="sub-tab-btn" onclick="osView('single')">👤 Per Vendor</button>
+      </div>
+      <!-- Cycle view toggle (shown in all-vendors mode) -->
+      <div id="os-cycle-toggle" style="display:flex;gap:6px;margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;">
+        <button id="os-month-btn" class="sub-tab-btn active" onclick="osCycleView('month')">📅 Month View</button>
+        <button id="os-cycle-btn" class="sub-tab-btn" onclick="osCycleView('cycle')">🔄 Cycle View</button>
+      </div>
+      <!-- Filter row -->
+      <div class="form-row" style="margin-bottom:0;">
+        <div class="form-group"><label>Month</label>
+          <select id="os-mo" onchange="renderOutstanding()"><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select>
+        </div>
+        <div class="form-group"><label>Year</label>
+          <input type="number" id="os-yr" value="2025" onchange="renderOutstanding()">
+        </div>
+        <div class="form-group os-single-only hidden"><label>Vendor</label>
+          <select id="os-vid" onchange="renderOutstanding()"><option value="">Select Vendor</option></select>
+        </div>
+      </div>
+    </div>
+    <div id="outstanding-out"></div>
+  </div>
+</div>
+
+<!-- COLLECTION -->
+<div class="section" id="tab-collection">
+
+  <!-- STEP 1: Date + Session -->
+  <div class="card" id="coll-step1">
+    <div class="card-title"><span>1️⃣</span> Select Date & Session</div>
+    <div class="form-row" style="align-items:flex-end;margin-bottom:16px;">
+      <div class="form-group" style="max-width:180px;"><label>Date</label><input type="date" id="col-date" onchange="collDateChanged()"></div>
+      <div id="col-cycle" class="cycle-badge" style="margin-bottom:0;">📅 Cycle</div>
+    </div>
+    <div class="session-toggle">
+      <button class="sess-btn morning" id="sess-m" onclick="collSelectSess('morning')">☀️ Morning</button>
+      <button class="sess-btn evening" id="sess-e" onclick="collSelectSess('evening')">🌙 Evening</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Select Vendor via dropdown -->
+  <div class="card hidden" id="coll-step2">
+    <div class="card-title">
+      <span>2️⃣</span> Select Customer
+      <span id="coll-sess-badge" style="margin-left:auto;font-size:12px;font-weight:600;"></span>
+    </div>
+    <div class="form-group" style="margin-bottom:0;">
+      <label>Customer</label>
+      <select id="coll-vendor-sel" onchange="collVendorDropdownChange()" style="font-size:15px;padding:13px 12px;">
+        <option value="">— Select Customer —</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- STEP 3: Enter Qty -->
+  <div class="card hidden" id="coll-step3">
+    <div class="card-title">
+      <span>3️⃣</span> Enter Milk Quantity
+      <button onclick="collBack()" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Sora',sans-serif;">← Back</button>
+    </div>
+    <div id="coll-vendor-info" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;display:flex;align-items:center;gap:12px;"></div>
+    <div class="form-row" id="coll-qty-row">
+      <div class="form-group" id="coll-cow-group">
+        <label>🐄 Cow Milk (Litres)</label>
+        <div class="milk-input-wrap">
+          <input type="number" id="coll-cow" min="0" step="0.1" placeholder="0.0" oninput="collCalcAmt()">
+          <span class="milk-unit">L</span>
+        </div>
+      </div>
+      <div class="form-group" id="coll-buf-group">
+        <label>🐃 Buffalo Milk (Litres)</label>
+        <div class="milk-input-wrap">
+          <input type="number" id="coll-buf" min="0" step="0.1" placeholder="0.0" oninput="collCalcAmt()">
+          <span class="milk-unit">L</span>
+        </div>
+      </div>
+    </div>
+    <div id="coll-amt-preview" style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.25);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;font-size:15px;font-weight:800;color:var(--accent);display:none;"></div>
+    <button class="btn btn-green btn-block" onclick="collSubmit()">💾 Save Entry</button>
+  </div>
+
+  <!-- Today's entries for this session -->
+  <div id="coll-done-list"></div>
+
+</div>
+
+<!-- PAYMENTS -->
+<div class="section" id="tab-payments">
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title"><span>🗓️</span> Payment Month</div>
+    <div class="form-row" style="margin-bottom:0;">
+      <div class="form-group">
+        <label>Month</label>
+        <select id="pay-mo" onchange="renderPay()">
+          <option value="0">January</option><option value="1">February</option>
+          <option value="2">March</option><option value="3">April</option>
+          <option value="4">May</option><option value="5">June</option>
+          <option value="6">July</option><option value="7">August</option>
+          <option value="8">September</option><option value="9">October</option>
+          <option value="10">November</option><option value="11">December</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Year</label>
+        <input type="number" id="pay-yr" value="2025" min="2020" max="2099" onchange="renderPay()">
+      </div>
+    </div>
+  </div>
+  <div id="pay-list"></div>
+</div>
+
+<!-- SECURITY -->
+<div class="section" id="tab-security">
+  <div class="card">
+    <div class="card-title"><span>🔐</span> Security Overview</div>
+    <div class="sec-item"><div class="sec-icon">🔑</div><div class="sec-text"><strong>PIN Lock</strong><span>App is locked with a 4-digit PIN. Auto-locks after 5 minutes of inactivity.</span></div></div>
+    <div class="sec-item"><div class="sec-icon">☁️</div><div class="sec-text"><strong>Google Sheets as Database</strong><span>All data lives only in your Google Sheet. Nothing is stored permanently on this device.</span></div></div>
+    <div class="sec-item"><div class="sec-icon">🔒</div><div class="sec-text"><strong>No Edit / No Delete</strong><span>Collection entries cannot be edited or deleted once saved — prevents accidental data tampering.</span></div></div>
+    <div class="sec-item"><div class="sec-icon">✏️</div><div class="sec-text"><strong>Rate-Only Updates</strong><span>Only milk rates (₹/L) can be updated on vendor profiles, as rates change each 10-day cycle.</span></div></div>
+    <div class="sec-item"><div class="sec-icon">📱</div><div class="sec-text"><strong>Multi-Device Access</strong><span>Open on any phone or computer — always fetches fresh data from Google Sheets on every login.</span></div></div>
+    <div class="sec-item"><div class="sec-icon">👥</div><div class="sec-text"><strong>Two Roles</strong><span>Manager: full access. Operator: collection entry only. Each has a separate PIN.<div id="sec-pin-info"></div></span></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>🔑</span> Change Manager PIN</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Default: 1234</p>
+    <div class="form-row">
+      <div class="form-group"><label>Current PIN</label><input type="password" id="op" maxlength="4" placeholder="••••" inputmode="numeric"></div>
+      <div class="form-group"><label>New PIN</label><input type="password" id="np" maxlength="4" placeholder="••••" inputmode="numeric"></div>
+      <div class="form-group"><label>Confirm PIN</label><input type="password" id="cp" maxlength="4" placeholder="••••" inputmode="numeric"></div>
+    </div>
+    <button class="btn btn-primary" onclick="changePin()">🔑 Update Manager PIN</button>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>👷</span> Change Operator PIN</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Default: 5678 — Operator can only enter milk collection</p>
+    <div class="form-row">
+      <div class="form-group"><label>Manager PIN (to authorize)</label><input type="password" id="op-auth" maxlength="4" placeholder="••••" inputmode="numeric"></div>
+      <div class="form-group"><label>New Operator PIN</label><input type="password" id="op-np" maxlength="4" placeholder="••••" inputmode="numeric"></div>
+      <div class="form-group"><label>Confirm PIN</label><input type="password" id="op-cp" maxlength="4" placeholder="••••" inputmode="numeric"></div>
+    </div>
+    <button class="btn btn-primary" onclick="changeOperatorPin()">🔑 Update Operator PIN</button>
+  </div>
+  <div class="card">
+    <div class="card-title"><span>☁️</span> Sheet Connection</div>
+    <div id="sec-sheet-status" style="font-size:13px;margin-bottom:12px;"></div>
+    <button class="btn btn-outline" onclick="openSettings()">⚙️ Manage Connection</button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay hidden" id="settings-modal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <h3>⚙️ Google Sheets Sync</h3>
+    <div class="setup-panel">
+      <strong style="font-size:13px;">One-time setup:</strong>
+      <div style="margin-top:12px;">
+        <div class="step"><div class="step-num">1</div><div class="step-text">Create a new Google Sheet named <strong>"Yogesh Dairy"</strong></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text">Go to <strong>Extensions → Apps Script</strong>, paste the provided script, save</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Deploy → New deployment → Web app</strong>, set access to <code>Anyone</code>, copy the URL</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-text">Paste URL below and click Connect</div></div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Apps Script Web App URL</label>
+      <input type="url" id="sheet-url" placeholder="https://script.google.com/macros/s/...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" style="flex:1;" id="conn-btn" onclick="connectSheet()">🔗 Connect & Load Data</button>
+      <button class="btn btn-outline" onclick="closeSettings()">Cancel</button>
+    </div>
+    <div id="conn-status" style="margin-top:10px;font-size:12px;color:var(--muted);"></div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-outline btn-sm" onclick="pullFromSheet()">🔄 Refresh All Data</button>
+      <button class="btn btn-danger btn-sm" onclick="disconnectSheet()">✕ Disconnect</button>
+    </div>
+  </div>
+</div>
+
+<!-- RATE EDIT MODAL -->
+<div class="modal-overlay hidden" id="rate-modal" onclick="if(event.target===this)closeRate()">
+  <div class="modal">
+    <h3>✏️ Update Milk Rates</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Only milk rates can be updated. Name, phone and address are permanent.</p>
+    <input type="hidden" id="rate-id">
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">
+      <div id="rate-vname" style="font-weight:700;font-size:15px;"></div>
+      <div id="rate-vmeta" style="font-size:12px;color:var(--muted);margin-top:3px;"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>🐄 Cow Rate (₹/L)</label><input type="number" id="rate-cr" step="0.5" min="0"></div>
+      <div class="form-group"><label>🐃 Buffalo Rate (₹/L)</label><input type="number" id="rate-br" step="0.5" min="0"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" style="flex:1;" onclick="saveRates()">💾 Save Rates</button>
+      <button class="btn btn-outline" onclick="closeRate()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay hidden" id="pay-modal" onclick="if(event.target===this)closePay()">
+  <div class="modal">
+    <h3>💳 Record Payment</h3>
+    <div id="pay-info" style="margin-bottom:14px;font-size:13px;color:var(--muted);"></div>
+    <input type="hidden" id="pay-vid">
+    <div class="form-group" style="margin-bottom:8px;">
+      <label>Net Balance Due</label>
+      <div id="pay-due" style="font-size:22px;font-weight:800;color:var(--accent);padding:4px 0;"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Amount (₹)</label>
+      <input type="number" id="pay-amt" step="0.5" placeholder="Enter amount">
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Payment Mode</label>
+      <select id="pay-mode"><option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option><option>Sell</option></select>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Payment Date</label>
+      <input type="date" id="pay-date">
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Remarks <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+      <input type="text" id="pay-remarks" placeholder="e.g. partial payment, festival advance…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-green" style="flex:1;" onclick="confirmPay()">✅ Confirm Payment</button>
+      <button class="btn btn-outline" onclick="closePay()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =========================================================
+// STATE — no localStorage for business data
+// =========================================================
+let V = [], C = [], P = []; // vendors, collections, payments
+let sheetUrl = localStorage.getItem('yd_url') || '';
+let sess = 'morning';
+let payData = null;
+let lockTimer = null;
+const LOCK_TIME = 5 * 60 * 1000;
+
+// =========================================================
+// ROLES & PIN
+// =========================================================
+let pinBuf = '';
+let currentRole = ''; // 'manager' or 'operator'
+
+function getMgrPin() { return localStorage.getItem('yd_pin') || '9670'; }
+function getOpPin()  { return localStorage.getItem('yd_op_pin') || '1234'; }
+
+// OPERATOR permissions: which tabs are allowed
+const OP_TABS = ['dashboard', 'vendors', 'collection'];
+const OP_VENDOR_SUBS = ['list', 'report']; // no 'add'
+
+function initLogin() {
+  // Show role step, hide pin step
+  document.getElementById('role-step').classList.remove('hidden');
+  document.getElementById('pin-step').classList.add('hidden');
+  pinBuf = ''; updateDots();
+  document.getElementById('pin-err').textContent = '';
+  currentRole = '';
+}
+
+function selectRole(role) {
+  currentRole = role;
+  document.getElementById('role-step').classList.add('hidden');
+  document.getElementById('pin-step').classList.remove('hidden');
+  document.getElementById('login-sub').textContent =
+    role === 'manager' ? '👔 Manager PIN' : '👷 Operator PIN';
+  pinBuf = ''; updateDots();
+  document.getElementById('pin-err').textContent = '';
+}
+
+function backToRoles() {
+  document.getElementById('pin-step').classList.add('hidden');
+  document.getElementById('role-step').classList.remove('hidden');
+  pinBuf = ''; updateDots();
+  currentRole = '';
+}
+
+function pp(d) {
+  if (pinBuf.length >= 4) return;
+  pinBuf += d; updateDots();
+  if (pinBuf.length === 4) setTimeout(checkPin, 120);
+}
+function pd() { pinBuf = pinBuf.slice(0,-1); updateDots(); document.getElementById('pin-err').textContent = ''; }
+function updateDots() { for(let i=0;i<4;i++) document.getElementById('d'+i).classList.toggle('filled', i < pinBuf.length); }
+
+function checkPin() {
+  const correctPin = currentRole === 'manager' ? getMgrPin() : getOpPin();
+  if (pinBuf === correctPin) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    applyRoleUI();
+    initApp();
+    resetLock();
+  } else {
+    document.getElementById('pin-err').textContent = '❌ Wrong PIN. Try again.';
+    pinBuf = ''; updateDots();
+  }
+}
+
+function applyRoleUI() {
+  const isMgr = currentRole === 'manager';
+  // Update role badge in header
+  const badge = document.getElementById('role-badge');
+  badge.className = 'role-badge ' + (isMgr ? 'role-manager' : 'role-operator');
+  badge.textContent = isMgr ? '👔 Manager' : '👷 Operator';
+
+  // Show/hide tabs based on role
+  const hiddenTabs = isMgr ? [] : ['payments', 'security'];
+  ['dashboard','vendors','collection','payments','security'].forEach(t => {
+    const btn = document.getElementById('tab-btn-' + t);
+    if (btn) btn.style.display = hiddenTabs.includes(t) ? 'none' : '';
+  });
+
+  // Show/hide Add Vendor sub-tab for operator
+  const addBtn = document.getElementById('vs-add-btn');
+  if (addBtn) addBtn.style.display = isMgr ? '' : 'none';
+}
+
+function lockApp() {
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
+  V = []; C = []; P = [];
+  clearTimeout(lockTimer);
+  initLogin();
+}
+
+function resetLock() {
+  clearTimeout(lockTimer);
+  lockTimer = setTimeout(lockApp, LOCK_TIME);
+}
+document.addEventListener('click', resetLock);
+document.addEventListener('touchstart', resetLock);
+
+function changePin() {
+  const op = document.getElementById('op').value;
+  const np = document.getElementById('np').value;
+  const cp2 = document.getElementById('cp').value;
+  if (op !== getMgrPin()) { toast('Current Manager PIN incorrect', 'error'); return; }
+  if (!/^\d{4}$/.test(np)) { toast('PIN must be 4 digits', 'error'); return; }
+  if (np !== cp2) { toast('PINs do not match', 'error'); return; }
+  localStorage.setItem('yd_pin', np);
+  ['op','np','cp'].forEach(id => document.getElementById(id).value = '');
+  toast('✅ Manager PIN updated!');
+}
+
+function changeOperatorPin() {
+  const auth = document.getElementById('op-auth').value;
+  const np   = document.getElementById('op-np').value;
+  const cp2  = document.getElementById('op-cp').value;
+  if (auth !== getMgrPin()) { toast('Manager PIN incorrect', 'error'); return; }
+  if (!/^\d{4}$/.test(np)) { toast('PIN must be 4 digits', 'error'); return; }
+  if (np !== cp2) { toast('PINs do not match', 'error'); return; }
+  if (np === getMgrPin()) { toast('Operator PIN cannot be same as Manager PIN', 'error'); return; }
+  localStorage.setItem('yd_op_pin', np);
+  ['op-auth','op-np','op-cp'].forEach(id => document.getElementById(id).value = '');
+  toast('✅ Operator PIN updated!');
+}
+
+// =========================================================
+// INIT
+// =========================================================
+async function initApp() {
+  const now = new Date();
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('hdate').textContent = `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+  updateSyncUI();
+
+  // Always show the app immediately — never block on loading screen
+  renderDash();
+  renderVList();
+
+  if (!sheetUrl) {
+    showNoSheetScreen();
+    return;
+  }
+
+  // Show a non-blocking banner while loading in background
+  showLoadingBanner();
+  pull(true);  // fire and forget — no await
+}
+
+function showLoadingBanner() {
+  // Show a small banner at top of dashboard — doesn't block the UI
+  const existing = document.getElementById('load-banner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'load-banner';
+  banner.style.cssText = 'background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--accent);display:flex;align-items:center;gap:10px;';
+  banner.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;flex-shrink:0;"></div><span>Syncing with Google Sheets…</span>';
+  const dash = document.getElementById('dash-content');
+  dash.insertBefore(banner, dash.firstChild);
+}
+
+function hideLoadingBanner() {
+  const b = document.getElementById('load-banner');
+  if (b) b.remove();
+}
+
+function showLoadingScreen() {
+  showLoadingBanner(); // kept for compatibility — now just shows banner
+}
+
+function showNoSheetScreen() {
+  const html = `<div style="text-align:center;padding:40px 20px;"><div style="font-size:48px;margin-bottom:16px;">🔗</div><div style="font-size:18px;font-weight:800;margin-bottom:8px;">Google Sheets Not Connected</div><div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;">This app requires Google Sheets to work.<br>All your data is stored securely in your sheet.</div><button class="btn btn-primary" onclick="openSettings()">⚙️ Setup Google Sheets Sync</button></div>`;
+  document.getElementById('dash-content').innerHTML = html;
+  const vl = document.getElementById('vlist'); if (vl) vl.innerHTML = html;
+}
+
+function showNoInternetScreen() {
+  toast('📵 No internet — check connection', 'error');
+}
+
+async function retryLoad() {
+  if (!sheetUrl) { showNoSheetScreen(); return; }
+  showLoadingBanner();
+  pull(true);
+}
+
+// =========================================================
+// UTILS
+// =========================================================
+function uid() { return Date.now()+'_'+Math.random().toString(36).substr(2,5); }
+
+// Parse a boolean value from Google Sheets — handles TRUE/FALSE strings, booleans, 0/1
+// Defaults to TRUE if blank/undefined (new vendors have both enabled by default)
+function parseBool(val) {
+  if (val === undefined || val === null || val === '') return true;
+  if (typeof val === 'boolean') return val;
+  const s = String(val).trim().toUpperCase();
+  if (s === 'FALSE' || s === '0' || s === 'NO') return false;
+  return true; // TRUE, 1, YES, or any other value → enabled
+}
+
+// Safely parse a date value coming from Google Sheets.
+// Google Sheets serialises Date cells as ISO strings via toISOString() in Apps Script,
+// which applies UTC — so "2025-02-01" stored in India (UTC+5:30) comes back as
+// "2025-01-31T18:30:00.000Z".  We must reconstruct the *local* calendar date that
+// was written into the cell, not the UTC interpretation.
+function sheetDate(raw) {
+  if (!raw) return '';
+  const s = String(raw).trim();
+  // Already plain YYYY-MM-DD (no timezone shift needed)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // ISO datetime — parse and use LOCAL date parts (not UTC)
+  if (s.includes('T')) {
+    // Add 5:30 offset for IST to recover the original calendar date
+    const d = new Date(s);
+    // Use IST offset: UTC+5:30 = 330 minutes
+    const ist = new Date(d.getTime() + 330 * 60 * 1000);
+    const yr  = ist.getUTCFullYear();
+    const mo  = String(ist.getUTCMonth()+1).padStart(2,'0');
+    const dy  = String(ist.getUTCDate()).padStart(2,'0');
+    return `${yr}-${mo}-${dy}`;
+  }
+  // Fallback: take first 10 chars
+  return s.substring(0,10);
+}
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast '+type+' show';
+  setTimeout(() => el.className = 'toast', 2800);
+}
+function fmtDate(d) {
+  if (!d) return '';
+  const s = String(d).substring(0,10).split('-');
+  if (s.length < 3) return d;
+  const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${s[2]} ${MN[+s[1]-1]} ${s[0]}`;
+}
+function toDay() { return new Date().toISOString().split('T')[0]; }
+function cycleFor(ds) { const d=parseInt(String(ds).split('-')[2]); return d<=10?1:d<=20?2:3; }
+function cycleName(c) { return c===1?'1–10':c===2?'11–20':'21–end'; }
+function cycleDates(yr, mo, cy) {
+  const m = String(mo+1).padStart(2,'0');
+  if (cy===1) return {s:`${yr}-${m}-01`, e:`${yr}-${m}-10`};
+  if (cy===2) return {s:`${yr}-${m}-11`, e:`${yr}-${m}-20`};
+  const ld = new Date(yr, mo+1, 0).getDate();
+  return {s:`${yr}-${m}-21`, e:`${yr}-${m}-${String(ld).padStart(2,'0')}`};
+}
+
+// =========================================================
+// TABS
+// =========================================================
+function switchTab(t, btn) {
+  // Role enforcement
+  if (currentRole === 'operator' && (t === 'payments' || t === 'security')) {
+    toast('Access denied for Operator role', 'error'); return;
+  }
+  // Sheet enforcement
+  if (!sheetUrl && t !== 'dashboard' && t !== 'security') {
+    toast('Connect to Google Sheets first!', 'error'); return;
+  }
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  btn.classList.add('active');
+  if (t==='collection') { initCollDate(); }
+  if (t==='payments') { initPayMonth(); renderPay(); }
+  if (t==='dashboard') { initDashDate(); renderDash(); }
+  if (t==='security') renderSecStatus();
+  if (t==='vendors') renderVList();
+}
+
+function vSub(s) {
+  if (s === 'add' && currentRole === 'operator') {
+    toast('Only Manager can add vendors', 'error'); return;
+  }
+  ['list','add','report','outstanding'].forEach(x => {
+    document.getElementById('vs-'+x).classList.toggle('hidden', x!==s);
+    document.getElementById('vs-'+x+'-btn').classList.toggle('active', x===s);
+  });
+  if (s==='report') { updRptSel(); renderReport(); }
+  if (s==='outstanding') { initOutstanding(); renderOutstanding(); }
+}
+
+// =========================================================
+// VENDORS
+// =========================================================
+async function addVendor() {
+  const name = document.getElementById('vn').value.trim();
+  if (!name) { toast('Enter vendor name', 'error'); return; }
+  if (!sheetUrl) { toast('Connect to Google Sheets first!', 'error'); return; }
+  const vendor = {
+    id: uid(), name,
+    phone: document.getElementById('vph').value.trim(),
+    cowRate: parseFloat(document.getElementById('vcr').value)||0,
+    buffaloRate: parseFloat(document.getElementById('vbr').value)||0,
+    address: document.getElementById('vadr').value.trim(),
+    cowEnabled: true,
+    buffaloEnabled: true
+  };
+  V.push(vendor); renderVList();
+  const ok = await sync('addVendor', {vendor});
+  if (ok) {
+    toast('✅ Vendor added & saved!');
+    ['vn','vph','vcr','vbr','vadr'].forEach(id => document.getElementById(id).value='');
+    vSub('list');
+  } else {
+    V = V.filter(v=>v.id!==vendor.id); renderVList();
+    toast('❌ Failed to save vendor. Check sheet connection.', 'error');
+  }
+}
+
+function openRate(id) {
+  const v = V.find(x=>x.id===id); if (!v) return;
+  document.getElementById('rate-id').value = v.id;
+  document.getElementById('rate-vname').textContent = v.name;
+  document.getElementById('rate-vmeta').textContent = (v.phone?'📞 '+v.phone:'')+(v.address?' · 📍'+v.address:'');
+  document.getElementById('rate-cr').value = v.cowRate||'';
+  document.getElementById('rate-br').value = v.buffaloRate||'';
+  document.getElementById('rate-modal').classList.remove('hidden');
+}
+function closeRate() { document.getElementById('rate-modal').classList.add('hidden'); }
+
+async function saveRates() {
+  const id = document.getElementById('rate-id').value;
+  const idx = V.findIndex(v=>v.id===id); if (idx<0) return;
+  const prev = {...V[idx]};
+  V[idx] = {...V[idx],
+    cowRate: parseFloat(document.getElementById('rate-cr').value)||0,
+    buffaloRate: parseFloat(document.getElementById('rate-br').value)||0
+  };
+  closeRate(); renderVList();
+  const ok = await sync('updateVendor', {vendor: V[idx]});
+  if (ok) { toast('✅ Rates updated!'); }
+  else { V[idx] = prev; renderVList(); toast('❌ Failed to update rates', 'error'); }
+}
+
+function renderVList() {
+  const el = document.getElementById('vlist');
+  document.getElementById('vcount').textContent = V.length ? `(${V.length})` : '';
+  if (!V.length) { el.innerHTML = '<div class="empty"><div class="ico">👤</div><p>No vendors yet.</p></div>'; return; }
+  el.innerHTML = V.map(v => {
+    const cowOn = v.cowEnabled !== false;
+    const bufOn = v.buffaloEnabled !== false;
+    const isMgr = currentRole === 'manager';
+    return `
+    <div class="vendor-item" style="flex-wrap:wrap;gap:10px;">
+      <div class="vendor-avatar">${v.name[0].toUpperCase()}</div>
+      <div class="vendor-info" style="flex:1;min-width:140px;">
+        <div class="vendor-name">${v.name}</div>
+        <div class="vendor-meta">${v.phone?`<span>📞 ${v.phone}</span>`:''}${v.address?`<span>📍 ${v.address}</span>`:''}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <span class="rate-tag rate-cow" style="${!cowOn?'opacity:0.35;text-decoration:line-through;':''}">🐄 ₹${v.cowRate}/L</span>
+          <span class="rate-tag rate-buffalo" style="${!bufOn?'opacity:0.35;text-decoration:line-through;':''}">🐃 ₹${v.buffaloRate}/L</span>
+        </div>
+        ${isMgr ? `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="toggle-btn ${cowOn?'toggle-on':''}" onclick="toggleMilk('${v.id}','cow')">
+            🐄 Cow: <strong>${cowOn?'ON':'OFF'}</strong>
+          </button>
+          <button class="toggle-btn ${bufOn?'toggle-on':''}" onclick="toggleMilk('${v.id}','buffalo')">
+            🐃 Buffalo: <strong>${bufOn?'ON':'OFF'}</strong>
+          </button>
+        </div>` : `<div style="margin-top:5px;font-size:11px;color:var(--muted);">
+          ${cowOn&&bufOn?'🐄🐃 Both enabled':cowOn?'🐄 Cow only':bufOn?'🐃 Buffalo only':'⛔ Collection disabled'}
+        </div>`}
+      </div>
+      ${isMgr ? `<button class="btn btn-outline btn-sm" onclick="openRate('${v.id}')" title="Update rates only">₹ Rate</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function toggleMilk(vid, type) {
+  const idx = V.findIndex(v => v.id === vid); if (idx < 0) return;
+  const prev = {...V[idx]};
+  if (type === 'cow')     V[idx].cowEnabled     = !V[idx].cowEnabled;
+  else                    V[idx].buffaloEnabled  = !V[idx].buffaloEnabled;
+  renderVList();
+  const ok = await sync('updateVendor', {vendor: V[idx]});
+  if (ok) { toast(`✅ ${V[idx].name} ${type} ${V[idx][type+'Enabled']?'enabled':'disabled'}`); }
+  else { V[idx] = prev; renderVList(); toast('❌ Failed to update', 'error'); }
+}
+
+// =========================================================
+// COLLECTION — Step-by-step flow
+// =========================================================
+let collSelVendorId = null; // currently selected vendor in step 3
+
+function initCollDate() {
+  if (!document.getElementById('col-date').value) document.getElementById('col-date').value = toDay();
+  collDateChanged();
+}
+
+function collDateChanged() {
+  const date = document.getElementById('col-date').value || toDay();
+  document.getElementById('col-date').value = date;
+  document.getElementById('col-cycle').textContent = `📅 Cycle ${cycleName(cycleFor(date))}`;
+  // Reset to step 1 when date changes
+  sess = '';
+  document.getElementById('sess-m').classList.remove('active');
+  document.getElementById('sess-e').classList.remove('active');
+  document.getElementById('coll-step2').classList.add('hidden');
+  document.getElementById('coll-step3').classList.add('hidden');
+  collRenderDone();
+}
+
+function collSelectSess(s) {
+  if (!document.getElementById('col-date').value) {
+    document.getElementById('col-date').value = toDay();
+    collDateChanged();
+  }
+  sess = s;
+  document.getElementById('sess-m').classList.toggle('active', s==='morning');
+  document.getElementById('sess-e').classList.toggle('active', s==='evening');
+  document.getElementById('coll-step2').classList.remove('hidden');
+  document.getElementById('coll-step3').classList.add('hidden');
+  collSelVendorId = null;
+  document.getElementById('coll-sess-badge').innerHTML =
+    s === 'morning'
+      ? '<span class="badge badge-morning">☀️ Morning</span>'
+      : '<span class="badge badge-evening">🌙 Evening</span>';
+  collBuildDropdown();
+  collRenderDone();
+  setTimeout(() => document.getElementById('coll-step2').scrollIntoView({behavior:'smooth', block:'nearest'}), 100);
+}
+
+function collBuildDropdown() {
+  const date = document.getElementById('col-date').value;
+  const sel = document.getElementById('coll-vendor-sel');
+  const saved = {};
+  C.filter(r => r.date === date && r.session === sess).forEach(r => { saved[r.vendorId] = r; });
+  sel.innerHTML = '<option value="">— Select Customer —</option>';
+  V.forEach(v => {
+    const cowOn = v.cowEnabled !== false;
+    const bufOn = v.buffaloEnabled !== false;
+    if (!cowOn && !bufOn) return; // skip fully disabled vendors
+    const done = saved[v.id];
+    const opt = document.createElement('option');
+    opt.value = v.id;
+    const milkType = cowOn && bufOn ? '🐄🐃' : cowOn ? '🐄' : '🐃';
+    opt.textContent = done
+      ? `✅ ${v.name} (saved)`
+      : `${milkType} ${v.name}`;
+    if (done) opt.disabled = true;
+    sel.appendChild(opt);
+  });
+  sel.value = '';
+}
+
+function collVendorDropdownChange() {
+  const vid = document.getElementById('coll-vendor-sel').value;
+  if (!vid) { document.getElementById('coll-step3').classList.add('hidden'); return; }
+  collSelectVendor(vid);
+}
+
+function collRenderVendorList() { collBuildDropdown(); } // kept for compatibility
+
+function collSelectVendor(vid) {
+  collSelVendorId = vid;
+  const v = V.find(x => x.id === vid); if (!v) return;
+  const cowOn = v.cowEnabled !== false;
+  const bufOn = v.buffaloEnabled !== false;
+
+  document.getElementById('coll-step3').classList.remove('hidden');
+
+  // Vendor info panel
+  const milkTag = cowOn && bufOn
+    ? `<span class="rate-tag rate-cow">🐄 ₹${v.cowRate}/L</span><span class="rate-tag rate-buffalo">🐃 ₹${v.buffaloRate}/L</span>`
+    : cowOn
+      ? `<span class="rate-tag rate-cow">🐄 Cow only · ₹${v.cowRate}/L</span>`
+      : `<span class="rate-tag rate-buffalo">🐃 Buffalo only · ₹${v.buffaloRate}/L</span>`;
+  document.getElementById('coll-vendor-info').innerHTML = `
+    <div class="vendor-avatar" style="width:36px;height:36px;font-size:14px;flex-shrink:0;">${v.name[0].toUpperCase()}</div>
+    <div>
+      <div style="font-weight:800;font-size:15px;">${v.name}</div>
+      <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">${milkTag}</div>
+    </div>`;
+
+  // Show/hide input fields based on what's enabled
+  document.getElementById('coll-cow-group').style.display = cowOn ? '' : 'none';
+  document.getElementById('coll-buf-group').style.display = bufOn ? '' : 'none';
+
+  // Clear inputs
+  document.getElementById('coll-cow').value = '';
+  document.getElementById('coll-buf').value = '';
+  document.getElementById('coll-amt-preview').style.display = 'none';
+
+  setTimeout(() => document.getElementById('coll-step3').scrollIntoView({behavior:'smooth', block:'nearest'}), 100);
+  // Focus on the first enabled field
+  setTimeout(() => {
+    if (cowOn) document.getElementById('coll-cow').focus();
+    else document.getElementById('coll-buf').focus();
+  }, 200);
+}
+
+function collBack() {
+  document.getElementById('coll-step3').classList.add('hidden');
+  document.getElementById('coll-vendor-sel').value = '';
+  collSelVendorId = null;
+}
+
+function collCalcAmt() {
+  if (!collSelVendorId) return;
+  const v = V.find(x => x.id === collSelVendorId); if (!v) return;
+  const cow = parseFloat(document.getElementById('coll-cow').value) || 0;
+  const buf = parseFloat(document.getElementById('coll-buf').value) || 0;
+  const preview = document.getElementById('coll-amt-preview');
+  if (cow > 0 || buf > 0) {
+    const amt = (cow * v.cowRate) + (buf * v.buffaloRate);
+    preview.style.display = 'block';
+    preview.innerHTML = `
+      💰 Amount: ₹${amt.toFixed(2)}
+      <span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:8px;">
+        ${cow>0?`🐄${cow}L×₹${v.cowRate}=₹${(cow*v.cowRate).toFixed(0)}`:''}
+        ${cow>0&&buf>0?' + ':''}
+        ${buf>0?`🐃${buf}L×₹${v.buffaloRate}=₹${(buf*v.buffaloRate).toFixed(0)}`:''}
+      </span>`;
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+async function collSubmit() {
+  if (!collSelVendorId) return;
+  const date = document.getElementById('col-date').value;
+  if (!date) { toast('Select date first', 'error'); return; }
+  if (!sheetUrl) { toast('Connect to Google Sheets first!', 'error'); return; }
+  const v = V.find(x => x.id === collSelVendorId); if (!v) return;
+  const cow = parseFloat(document.getElementById('coll-cow').value) || 0;
+  const buf = parseFloat(document.getElementById('coll-buf').value) || 0;
+  if (cow <= 0 && buf <= 0) { toast('Enter at least cow or buffalo qty', 'error'); return; }
+  // Check already saved
+  const alreadySaved = C.find(r => r.date === date && r.session === sess && r.vendorId === collSelVendorId);
+  if (alreadySaved) { toast('Entry already saved for this vendor', 'error'); return; }
+  const rec = { id: uid(), date, session: sess, vendorId: v.id, vendorName: v.name, cowLitres: cow, buffaloLitres: buf, cowRate: v.cowRate, buffaloRate: v.buffaloRate, amount: (cow*v.cowRate)+(buf*v.buffaloRate) };
+  C.push(rec);
+  // Hide step 3, reset dropdown, rebuild list
+  document.getElementById('coll-step3').classList.add('hidden');
+  document.getElementById('coll-vendor-sel').value = '';
+  collSelVendorId = null;
+  collBuildDropdown();
+  collRenderDone();
+  renderDash();
+  const ok = await sync('saveCollection', { records: [rec] });
+  if (ok) { toast(`✅ ${v.name} saved — ₹${rec.amount.toFixed(0)}`); }
+  else { C = C.filter(c => c.id !== rec.id); collRenderVendorList(); collRenderDone(); toast('❌ Failed to save. Check connection.', 'error'); }
+}
+
+function collRenderDone() {
+  const date = document.getElementById('col-date').value || toDay();
+  const el = document.getElementById('coll-done-list');
+  if (!sess) { el.innerHTML = ''; return; }
+  const done = C.filter(r => r.date === date && r.session === sess);
+  if (!done.length) { el.innerHTML = ''; return; }
+  const total = done.reduce((a,r) => a+(r.amount||0), 0);
+  el.innerHTML = `<div class="card">
+    <div class="card-title"><span>${sess==='morning'?'☀️':'🌙'}</span> ${sess==='morning'?'Morning':'Evening'} Entries — ${fmtDate(date)}
+      <span style="margin-left:auto;font-size:13px;color:var(--accent);">₹${total.toFixed(0)}</span>
+    </div>
+    ${done.map(r => `<div class="vendor-entry locked" style="margin-bottom:8px;">
+      <div class="vendor-entry-header">
+        <span style="width:24px;height:24px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#001a10;">${r.vendorName[0].toUpperCase()}</span>
+        ${r.vendorName} <span class="locked-badge">✅ Saved</span>
+      </div>
+      <div class="entry-fields">
+        <div class="entry-field"><label>🐄 Cow</label><div class="saved-val">${r.cowLitres||0} L</div></div>
+        <div class="entry-field"><label>🐃 Buffalo</label><div class="saved-val">${r.buffaloLitres||0} L</div></div>
+        <div class="entry-field"><label>Amount</label><div class="saved-val">₹${(r.amount||0).toFixed(0)}</div></div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+
+// =========================================================
+// PAYMENTS  — net balance, multiple payments per vendor
+// =========================================================
+
+function initPayMonth() {
+  const now = new Date();
+  document.getElementById('pay-mo').value = now.getMonth();
+  document.getElementById('pay-yr').value = now.getFullYear();
+}
+
+function renderPay() {
+  const el = document.getElementById('pay-list');
+  if (!V.length) { el.innerHTML = '<div class="empty"><div class="ico">💰</div><p>No vendors yet.</p></div>'; return; }
+
+  const selMo = parseInt(document.getElementById('pay-mo').value);
+  const selYr = parseInt(document.getElementById('pay-yr').value);
+  const moStart = `${selYr}-${String(selMo+1).padStart(2,'0')}-01`;
+  const moEnd   = `${selYr}-${String(selMo+1).padStart(2,'0')}-31`;
+
+  const MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  // Month payments
+  const monthPayments = P.filter(p => { const d = p.paidAt ? p.paidAt.substring(0,10) : ''; return d >= moStart && d <= moEnd; });
+
+  // Pre-compute month collection per vendor in one pass
+  const moCollByV = {};
+  C.forEach(r => { if (r.date >= moStart && r.date <= moEnd) moCollByV[r.vendorId] = (moCollByV[r.vendorId]||0) + (r.amount||0); });
+
+  // Pre-compute opening balances (all collection/payments BEFORE moStart) in one pass
+  const prevCollByV = {}, prevPaidByV = {};
+  C.forEach(r => { if (r.date < moStart) prevCollByV[r.vendorId] = (prevCollByV[r.vendorId]||0) + (r.amount||0); });
+  P.forEach(p => {
+    const d = p.paidAt ? p.paidAt.substring(0,10) : '';
+    if (d && d < moStart) prevPaidByV[p.vendorId] = (prevPaidByV[p.vendorId]||0) + (p.paidAmount||0);
+  });
+
+  const rows = V.map(v => {
+    const opening = (prevCollByV[v.id]||0) - (prevPaidByV[v.id]||0);
+
+    // This month
+    const moColl  = moCollByV[v.id]||0;
+    const moPaid  = monthPayments.filter(p => p.vendorId === v.id).reduce((a,p) => a+(p.paidAmount||0), 0);
+    const netBal  = opening + moColl - moPaid; // positive = payable, negative = advance
+
+    const vMoPays = monthPayments.filter(p => p.vendorId === v.id).sort((a,b) => (b.paidAt||'').localeCompare(a.paidAt||''));
+    return { v, opening, moColl, moPaid, netBal, vMoPays };
+  }).sort((a,b) => {
+    const aA = a.moColl>0||a.moPaid>0 ? 1 : 0;
+    const bA = b.moColl>0||b.moPaid>0 ? 1 : 0;
+    if (bA !== aA) return bA - aA;
+    return b.netBal - a.netBal;
+  });
+
+  // Tab summary totals
+  const sumPayable = rows.filter(r=>r.netBal>0.005).reduce((a,r)=>a+r.netBal,0);
+  const sumAdv     = rows.filter(r=>r.netBal<-0.005).reduce((a,r)=>a+Math.abs(r.netBal),0);
+  const sumMoPaid  = rows.reduce((a,r)=>a+r.moPaid,0);
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title"><span>💰</span> ${MN[selMo]} ${selYr} — Summary</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div style="background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.2);border-radius:var(--radius-sm);padding:12px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--blue);">₹${sumMoPaid.toFixed(0)}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">Paid This Month</div>
+        </div>
+        <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:var(--radius-sm);padding:12px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--morning);">₹${sumPayable.toFixed(0)}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">Net Payable</div>
+        </div>
+        <div style="background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.2);border-radius:var(--radius-sm);padding:12px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--green);">₹${sumAdv.toFixed(0)}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;">Net Advance</div>
+        </div>
+      </div>
+    </div>
+    ${rows.map(({v, opening, moColl, moPaid, netBal, vMoPays}) => {
+      const balClass   = netBal>0.005?'var(--morning)':netBal<-0.005?'var(--green)':'var(--muted)';
+      const balLabel   = netBal>0.005?'Payable':netBal<-0.005?'Advance':'Settled';
+      const balDisplay = netBal>0.005?`₹${netBal.toFixed(0)}`:netBal<-0.005?`₹${Math.abs(netBal).toFixed(0)} adv`:'₹0';
+      const hasActivity = moColl>0||moPaid>0||Math.abs(opening)>0.005;
+      const openClass  = opening>0.005?'var(--morning)':opening<-0.005?'var(--green)':'var(--muted)';
+      const openLabel  = opening>0.005?'Outstanding b/f':opening<-0.005?'Advance b/f':'Nil';
+      const openDisplay= opening>0.005?`+₹${opening.toFixed(0)}`:opening<-0.005?`-₹${Math.abs(opening).toFixed(0)}`:'₹0';
+      return `<div class="payment-card" style="${!hasActivity?'opacity:0.5':''}">
+        <div class="payment-header" onclick="togPay('pp${v.id}')">
+          <div class="vendor-avatar" style="width:36px;height:36px;font-size:14px;">${v.name[0].toUpperCase()}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:14px;">${v.name}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+              Coll ₹${moColl.toFixed(0)} · Paid ₹${moPaid.toFixed(0)}${Math.abs(opening)>0.005?' · b/f '+openDisplay:''}
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:18px;font-weight:800;color:${balClass};">${balDisplay}</div>
+            <div style="font-size:10px;color:${balClass};font-weight:700;">${balLabel}</div>
+          </div>
+        </div>
+        <div class="payment-body hidden" id="pp${v.id}">
+          <div class="payment-stat">
+            <span class="lbl">Opening Balance</span>
+            <span class="val" style="color:${openClass};">${openDisplay} <span style="font-size:10px;font-weight:400;">(${openLabel})</span></span>
+          </div>
+          <div class="payment-stat"><span class="lbl">${MN[selMo]} Collection</span><span class="val" style="color:var(--accent);">₹${moColl.toFixed(2)}</span></div>
+          <div class="payment-stat"><span class="lbl">${MN[selMo]} Paid</span><span class="val" style="color:var(--green);">₹${moPaid.toFixed(2)}</span></div>
+          <div class="payment-stat" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px;">
+            <span class="lbl" style="font-weight:700;">Net Balance</span>
+            <span class="val" style="color:${balClass};font-weight:800;font-size:15px;">${netBal>0?'₹'+netBal.toFixed(2)+' payable':netBal<0?'₹'+Math.abs(netBal).toFixed(2)+' advance':'✅ Settled'}</span>
+          </div>
+          <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openPay('${v.id}',${netBal})">💳 Record Payment</button>
+          ${vMoPays.length ? `
+          <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">${MN[selMo]} ${selYr} — Payment Entries</div>
+            ${vMoPays.map(p=>`
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;">
+              <div>
+                <span style="font-weight:700;color:var(--green);">₹${(p.paidAmount||0).toFixed(0)}</span>
+                <span style="color:var(--muted);margin-left:8px;">${p.note||'Cash'}${p.remarks?' · <em>'+p.remarks+'</em>':''}</span>
+              </div>
+              <span style="color:var(--muted);font-size:11px;">${fmtDate(p.paidAt?.substring(0,10)||'')}</span>
+            </div>`).join('')}
+          </div>` : `<div style="font-size:12px;color:var(--muted);margin-top:10px;padding-top:4px;">No payments recorded in ${MN[selMo]} ${selYr}</div>`}
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+function togPay(id) { const el=document.getElementById(id); if(el) el.classList.toggle('hidden'); }
+
+function openPay(vid, bal) {
+  const v = V.find(x=>x.id===vid);
+  payData = { vid, bal };
+  document.getElementById('pay-vid').value = vid;
+  document.getElementById('pay-info').textContent = v.name;
+  document.getElementById('pay-due').textContent = bal>0 ? `₹${bal.toFixed(2)} payable` : bal<0 ? `₹${Math.abs(bal).toFixed(2)} advance already` : '✅ Settled';
+  document.getElementById('pay-amt').value = bal > 0 ? bal.toFixed(2) : '';
+  document.getElementById('pay-mode').value = 'Cash';
+  document.getElementById('pay-remarks').value = '';
+  document.getElementById('pay-date').value = toDay();
+  document.getElementById('pay-modal').classList.remove('hidden');
+}
+
+async function confirmPay() {
+  const { vid } = payData;
+  const v = V.find(x=>x.id===vid);
+  const paidAmt = parseFloat(document.getElementById('pay-amt').value)||0;
+  if (paidAmt <= 0) { toast('Enter a valid amount', 'error'); return; }
+  const mode    = document.getElementById('pay-mode').value;
+  const remarks = document.getElementById('pay-remarks').value.trim();
+  const payDate = document.getElementById('pay-date').value || toDay();
+  const paidAt  = payDate + 'T00:00:00.000Z';
+  const po = {
+    id: uid(),
+    vendorId: vid,
+    vendorName: v.name,
+    paidAmount: paidAmt,
+    note: mode,
+    remarks: remarks,
+    paidAt: paidAt
+  };
+  P.push(po);
+  closePay(); renderPay();
+  const ok = await sync('savePayment', { payment: po });
+  if (ok) { toast(`✅ ₹${paidAmt.toFixed(0)} recorded for ${v.name} on ${fmtDate(payDate)}`); renderDash(); }
+  else { P = P.filter(p=>p.id!==po.id); renderPay(); toast('❌ Payment save failed', 'error'); }
+}
+
+function closePay() { document.getElementById('pay-modal').classList.add('hidden'); }
+
+
+// =========================================================
+// DASHBOARD
+// =========================================================
+function initDashDate() {
+  const el = document.getElementById('dash-date');
+  if (el && !el.value) el.value = toDay();
+}
+
+function renderDash() {
+  initDashDate();
+  const dashDateEl = document.getElementById('dash-date');
+  const selDate = (dashDateEl && dashDateEl.value) ? dashDateEl.value : toDay();
+  const today = toDay();
+  const isToday = selDate === today;
+  const now = new Date(); const cy = cycleFor(today);
+  const {s,e} = cycleDates(now.getFullYear(), now.getMonth(), cy);
+
+  const mT = C.filter(r => r.date === selDate && r.session === 'morning');
+  const eT = C.filter(r => r.date === selDate && r.session === 'evening');
+  const mL = mT.reduce((a,r) => a+(r.cowLitres||0)+(r.buffaloLitres||0), 0);
+  const eL = eT.reduce((a,r) => a+(r.cowLitres||0)+(r.buffaloLitres||0), 0);
+
+  // Build morning/evening indexed maps
+  const mMap = {}, eMap = {};
+  mT.forEach(r => { mMap[r.vendorId] = r; });
+  eT.forEach(r => { eMap[r.vendorId] = r; });
+
+  // All vendors with at least one milk type enabled
+  const activeV = V.filter(v => v.cowEnabled !== false || v.buffaloEnabled !== false);
+
+  const collectionCard = `
+    <div class="card">
+      <div class="card-title">
+        <span>📅</span> ${isToday ? "Today's" : fmtDate(selDate)} Collection
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <input type="date" id="dash-date" value="${selDate}" max="${today}"
+            onchange="renderDash()"
+            style="font-size:12px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Sora',sans-serif;">
+        </div>
+      </div>
+      ${!activeV.length
+        ? '<div class="empty" style="padding:16px"><div class="ico">👤</div><p>No vendors yet.</p></div>'
+        : `<div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="min-width:90px;">Vendor</th>
+                <th style="text-align:center;background:rgba(251,191,36,0.07);border-left:2px solid rgba(251,191,36,0.2);">☀️ Morning<br><span style="font-size:10px;font-weight:400;color:var(--muted);">🐄L / 🐃L</span></th>
+                <th style="text-align:center;background:rgba(129,140,248,0.07);border-left:2px solid rgba(129,140,248,0.2);">🌙 Evening<br><span style="font-size:10px;font-weight:400;color:var(--muted);">🐄L / 🐃L</span></th>
+              </tr>
+            </thead>
+            <tbody>
+            ${activeV.map(v => {
+              const mr = mMap[v.id], er = eMap[v.id];
+              const mCell = mr
+                ? `<span style="font-weight:700;color:var(--accent);">${(mr.cowLitres||0) + (mr.buffaloLitres||0)}L</span><br><span style="font-size:10px;color:var(--muted);">${mr.cowLitres||0} / ${mr.buffaloLitres||0}</span>`
+                : `<span style="color:var(--muted);">—</span>`;
+              const eCell = er
+                ? `<span style="font-weight:700;color:var(--accent);">${(er.cowLitres||0) + (er.buffaloLitres||0)}L</span><br><span style="font-size:10px;color:var(--muted);">${er.cowLitres||0} / ${er.buffaloLitres||0}</span>`
+                : `<span style="color:var(--muted);">—</span>`;
+              return `<tr>
+                <td style="font-weight:600;">${v.name}</td>
+                <td style="text-align:center;background:rgba(251,191,36,0.03);border-left:2px solid rgba(251,191,36,0.15);">${mCell}</td>
+                <td style="text-align:center;background:rgba(129,140,248,0.03);border-left:2px solid rgba(129,140,248,0.15);">${eCell}</td>
+              </tr>`;
+            }).join('')}
+            <tr style="background:rgba(245,166,35,0.05);font-weight:800;">
+              <td>Total</td>
+              <td style="text-align:center;border-left:2px solid rgba(251,191,36,0.15);color:var(--morning);">${mL.toFixed(1)}L</td>
+              <td style="text-align:center;border-left:2px solid rgba(129,140,248,0.15);color:var(--evening||'#818cf8');">${eL.toFixed(1)}L</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>`}
+    </div>`;
+
+  document.getElementById('dash-content').innerHTML = `
+    ${!sheetUrl ? `<div class="banner">⚠️ Not connected to Google Sheets — data won't be saved!<button class="btn btn-primary btn-sm" onclick="openSettings()">Connect</button></div>` : ''}
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num accent">${V.length}</div><div class="stat-label">Total Vendors</div></div>
+      <div class="stat-box"><div class="stat-num green">${cycleName(cy)}</div><div class="stat-label">Current Cycle</div></div>
+      <div class="stat-box"><div class="stat-num blue">${mL.toFixed(1)}L</div><div class="stat-label">${isToday?'Today':'Sel'} Morning</div></div>
+      <div class="stat-box"><div class="stat-num purple">${eL.toFixed(1)}L</div><div class="stat-label">${isToday?'Today':'Sel'} Evening</div></div>
+    </div>
+    ${collectionCard}
+`;
+}
+
+// =========================================================
+// VENDOR REPORT
+// =========================================================
+function updRptSel() {
+  const sel=document.getElementById('rv'), cur=sel.value;
+  sel.innerHTML='<option value="">Select Vendor</option>'+V.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');
+  if(cur) sel.value=cur;
+  // Always sync to current year/month (user can change after)
+  const now = new Date();
+  const ryEl = document.getElementById('ry');
+  if (!ryEl.value) ryEl.value = now.getFullYear();
+  document.getElementById('rm').value = now.getMonth();
+}
+function renderReport() {
+  const vid=document.getElementById('rv').value, mo=parseInt(document.getElementById('rm').value), yr=parseInt(document.getElementById('ry').value), cy=parseInt(document.getElementById('rc').value);
+  const out=document.getElementById('report-out');
+  if (!vid) { out.innerHTML='<div class="card"><div class="empty"><div class="ico">👨‍🌾</div><p>Select a vendor to view report.</p></div></div>'; return; }
+  const vendor=V.find(v=>v.id===vid); if(!vendor) return;
+  const ms=String(mo+1).padStart(2,'0'), ld=new Date(yr,mo+1,0).getDate();
+  const ds=cy===0?`${yr}-${ms}-01`:cycleDates(yr,mo,cy).s;
+  const de=cy===0?`${yr}-${ms}-${String(ld).padStart(2,'0')}`:cycleDates(yr,mo,cy).e;
+  const vc=C.filter(r=>r.vendorId===vid&&r.date>=ds&&r.date<=de);
+  if (!vc.length) { out.innerHTML=`<div class="card"><div class="empty"><div class="ico">📭</div><p>No data for ${vendor.name} in this period.</p></div></div>`; return; }
+
+  // Collection totals
+  const byDate={};
+  vc.forEach(r=>{if(!byDate[r.date])byDate[r.date]={morning:null,evening:null};byDate[r.date][r.session]=r;});
+  const dates=Object.keys(byDate).sort();
+  let tc=0,tb=0,ta=0,mc=0,mb=0,ma=0,ec=0,eb=0,ea=0;
+  vc.forEach(r=>{tc+=r.cowLitres||0;tb+=r.buffaloLitres||0;ta+=r.amount||0;if(r.session==='morning'){mc+=r.cowLitres||0;mb+=r.buffaloLitres||0;ma+=r.amount||0;}else{ec+=r.cowLitres||0;eb+=r.buffaloLitres||0;ea+=r.amount||0;}});
+
+  // Opening / closing balance
+  const prevColl = C.filter(r=>r.vendorId===vid&&r.date<ds).reduce((a,r)=>a+(r.amount||0),0);
+  const prevPaid = P.filter(p=>p.vendorId===vid&&p.paidAt&&p.paidAt.substring(0,10)<ds).reduce((a,p)=>a+(p.paidAmount||0),0);
+  const openingBal = prevColl - prevPaid;
+
+  // Payments made in this period
+  const periodPayments = P.filter(p=>{
+    if(p.vendorId!==vid) return false;
+    const pd=p.paidAt?p.paidAt.substring(0,10):'';
+    return pd>=ds&&pd<=de;
+  }).sort((a,b)=>(a.paidAt||'').localeCompare(b.paidAt||''));
+  const periodPaid = periodPayments.reduce((a,p)=>a+(p.paidAmount||0),0);
+  const closingBal = openingBal + ta - periodPaid;
+
+  const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const cycLbl=cy===0?'Full Month':`Cycle ${cycleName(cy)}`;
+  const openClass = openingBal>0.005?'color:var(--morning)':openingBal<-0.005?'color:var(--green)':'color:var(--muted)';
+  const closeClass = closingBal>0.005?'color:var(--morning)':closingBal<-0.005?'color:var(--green)':'color:var(--muted)';
+  const openStr = openingBal>0.005?`₹${openingBal.toFixed(0)} due`:openingBal<-0.005?`₹${Math.abs(openingBal).toFixed(0)} advance`:'₹0';
+  const closeStr = closingBal>0.005?`₹${closingBal.toFixed(0)} due`:closingBal<-0.005?`₹${Math.abs(closingBal).toFixed(0)} advance`:'✅ Settled';
+
+  // Store data for PDF (printReport reads these)
+  window.openingBal_ = openingBal; window.closingBal_ = closingBal;
+  window.openStr_ = openStr; window.closeStr_ = closeStr;
+  window.ta_ = ta.toFixed(0); window.tc_ = tc.toFixed(1); window.tb_ = tb.toFixed(1);
+  window.mc_ = mc.toFixed(1); window.mb_ = mb.toFixed(1); window.ma_ = ma.toFixed(0);
+  window.ec_ = ec.toFixed(1); window.eb_ = eb.toFixed(1); window.ea_ = ea.toFixed(0);
+  window.periodPaid_ = periodPaid.toFixed(0);
+  window.cowRate_ = vendor.cowRate; window.bufRate_ = vendor.buffaloRate;
+  window.datesData_ = dates.map(dt => {
+    const d = byDate[dt]; const entries = [];
+    if (d.morning) entries.push({s:'morning', r:d.morning});
+    if (d.evening) entries.push({s:'evening', r:d.evening});
+    return { dt: fmtDate(dt), entries };
+  });
+  window.periodPaymentsData_ = periodPayments;
+
+  out.innerHTML=`
+    <div class="card" id="rpt-printable">
+      <div class="card-title">
+        <span>👨‍🌾</span> ${vendor.name}
+        <span style="font-size:12px;color:var(--muted);font-weight:400;">${MN[mo]} ${yr} · ${cycLbl}</span>
+        <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="printReport('${vendor.name}','${MN[mo]} ${yr}','${cycLbl}')">📤 Share / PDF</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;"><span class="rate-tag rate-cow">🐄 ₹${vendor.cowRate}/L</span><span class="rate-tag rate-buffalo">🐃 ₹${vendor.buffaloRate}/L</span></div>
+
+      <!-- Opening / Closing Balance -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Opening Balance</div>
+          <div style="font-size:16px;font-weight:800;${openClass};">${openStr}</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Closing Balance</div>
+          <div style="font-size:16px;font-weight:800;${closeClass};">${closeStr}</div>
+        </div>
+      </div>
+
+      <!-- Collection Summary -->
+      <div class="report-summary-grid">
+        <div class="report-stat"><div class="rnum" style="color:var(--accent);">₹${ta.toFixed(0)}</div><div class="rlbl">Collection</div></div>
+        <div class="report-stat"><div class="rnum" style="color:var(--cow);">${tc.toFixed(1)}L</div><div class="rlbl">🐄 Cow</div></div>
+        <div class="report-stat"><div class="rnum" style="color:var(--buffalo);">${tb.toFixed(1)}L</div><div class="rlbl">🐃 Buffalo</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:var(--radius-sm);padding:12px;"><div style="font-size:11px;font-weight:700;color:var(--morning);margin-bottom:6px;">☀️ MORNING</div><div style="font-size:13px;font-weight:600;">🐄 ${mc.toFixed(1)}L · 🐃 ${mb.toFixed(1)}L</div><div style="font-size:16px;font-weight:800;color:var(--accent);margin-top:4px;">₹${ma.toFixed(0)}</div></div>
+        <div style="background:rgba(129,140,248,0.07);border:1px solid rgba(129,140,248,0.2);border-radius:var(--radius-sm);padding:12px;"><div style="font-size:11px;font-weight:700;color:var(--evening);margin-bottom:6px;">🌙 EVENING</div><div style="font-size:13px;font-weight:600;">🐄 ${ec.toFixed(1)}L · 🐃 ${eb.toFixed(1)}L</div><div style="font-size:16px;font-weight:800;color:var(--accent);margin-top:4px;">₹${ea.toFixed(0)}</div></div>
+      </div>
+    </div>
+
+    <!-- Day-wise Detail -->
+    <div class="card" id="rpt-daywise">
+      <div class="card-title"><span>📅</span> Day-wise Collection</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;">
+        <div class="sub-hdr"><div class="day-col dc-date">Date</div><div class="day-col">Session</div><div class="day-col dc-num">🐄L</div><div class="day-col dc-num">🐃L</div><div class="day-col dc-amt">₹ Amt</div></div>
+        ${dates.map(dt=>{const d=byDate[dt];const rows=[];if(d.morning)rows.push({s:'morning',r:d.morning});if(d.evening)rows.push({s:'evening',r:d.evening});return rows.map((it,i)=>`<div class="day-row"><div class="day-col dc-date">${i===0?fmtDate(dt):''}</div><div class="day-col"><span class="badge badge-${it.s}">${it.s==='morning'?'☀️':'🌙'} ${it.s}</span></div><div class="day-col dc-num">${it.r.cowLitres||0}</div><div class="day-col dc-num">${it.r.buffaloLitres||0}</div><div class="day-col dc-amt">₹${(it.r.amount||0).toFixed(0)}</div></div>`).join('');}).join('')}
+        <div class="day-row" style="background:rgba(245,166,35,0.06);border-top:1px solid var(--border);"><div class="day-col dc-date" style="font-weight:800;">TOTAL</div><div class="day-col"></div><div class="day-col dc-num" style="font-weight:700;color:var(--cow);">${tc.toFixed(1)}</div><div class="day-col dc-num" style="font-weight:700;color:var(--buffalo);">${tb.toFixed(1)}</div><div class="day-col dc-amt" style="font-size:15px;">₹${ta.toFixed(0)}</div></div>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="card" id="rpt-payments">
+      <div class="card-title"><span>💳</span> Payments in this Period</div>
+      ${!periodPayments.length
+        ? '<div class="empty" style="padding:14px"><div class="ico">💸</div><p>No payments recorded in this period.</p></div>'
+        : `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr 1.5fr;padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);border-bottom:1px solid var(--border);">
+              <div>Date</div><div style="text-align:right;">Amount</div><div style="text-align:center;">Mode</div><div>Remarks</div>
+            </div>
+            ${periodPayments.map(p=>`
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr 1.5fr;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;">
+              <div style="color:var(--muted);">${fmtDate(p.paidAt?.substring(0,10)||'')}</div>
+              <div style="text-align:right;font-weight:700;color:var(--green);">₹${(p.paidAmount||0).toFixed(0)}</div>
+              <div style="text-align:center;">${p.note||'Cash'}</div>
+              <div style="color:var(--muted);font-size:11px;">${p.remarks||'—'}</div>
+            </div>`).join('')}
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.5fr 1.5fr;padding:9px 12px;font-weight:800;background:rgba(52,211,153,0.06);font-size:13px;">
+              <div>Total Paid</div>
+              <div style="text-align:right;color:var(--green);">₹${periodPaid.toFixed(0)}</div>
+              <div></div><div></div>
+            </div>
+          </div>`}
+      <div style="margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px;">Opening + Collection − Paid = Closing</div>
+          <div style="font-size:12px;color:var(--muted);">${openStr} + ₹${ta.toFixed(0)} − ₹${periodPaid.toFixed(0)}</div>
+        </div>
+        <div style="font-size:17px;font-weight:800;${closeClass};">${closeStr}</div>
+      </div>
+    </div>`;
+}
+
+function printReport(name, period, cycle) {
+  // Grab all 3 sections: summary + day-wise + payments
+  const s1 = document.getElementById('rpt-printable');
+  const s2 = document.getElementById('rpt-daywise');
+  const s3 = document.getElementById('rpt-payments');
+  if (!s1) return;
+
+  const css = `
+    body{font-family:Arial,sans-serif;padding:20px;color:#111;background:#fff;font-size:13px;}
+    h2{margin:0 0 2px;font-size:18px;}
+    .sub{color:#666;font-size:12px;margin-bottom:14px;}
+    .section{margin-bottom:20px;border:1px solid #ddd;border-radius:6px;padding:14px;}
+    .section-title{font-weight:700;font-size:14px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #eee;color:#333;}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+    .box{border:1px solid #ddd;border-radius:6px;padding:10px;text-align:center;}
+    .box-label{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:3px;}
+    .box-val{font-size:16px;font-weight:700;}
+    .stats{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+    .stat{flex:1;min-width:80px;border:1px solid #eee;border-radius:6px;padding:8px;text-align:center;}
+    .stat-num{font-size:18px;font-weight:700;color:#f5a623;}
+    .stat-lbl{font-size:10px;color:#888;margin-top:2px;}
+    table{width:100%;border-collapse:collapse;margin-top:8px;}
+    th{background:#f5a623;color:#fff;padding:7px 10px;text-align:left;font-size:11px;}
+    td{padding:7px 10px;border-bottom:1px solid #eee;font-size:12px;}
+    .total-row{font-weight:bold;background:#fff9f0;}
+    .green{color:#059669;} .orange{color:#d97706;} .muted{color:#888;}
+    .sess{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;}
+    .morning{background:#fef3c7;color:#92400e;} .evening{background:#ede9fe;color:#5b21b6;}
+    .bal-row{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f9fafb;border-radius:6px;margin-top:10px;border:1px solid #eee;}
+    .formula{font-size:11px;color:#888;}
+    @media print{button{display:none!important;} .no-print{display:none!important;}}
+  `;
+
+  // Build clean HTML for each section
+  const summaryHtml = `
+    <div class="section">
+      <div class="section-title">Summary</div>
+      <div class="grid2">
+        <div class="box"><div class="box-label">Opening Balance</div><div class="box-val ${openingBal_>0?'orange':openingBal_<0?'green':''}">${openStr_}</div></div>
+        <div class="box"><div class="box-label">Closing Balance</div><div class="box-val ${closingBal_>0?'orange':closingBal_<0?'green':''}">${closeStr_}</div></div>
+      </div>
+      <div class="grid2">
+        <div class="box" style="background:#fffbeb;"><div class="box-label">☀️ Morning</div><div style="font-size:12px;margin:4px 0;">🐄 ${mc_}L · 🐃 ${mb_}L</div><div class="box-val" style="color:#f5a623;">₹${ma_}</div></div>
+        <div class="box" style="background:#f5f3ff;"><div class="box-label">🌙 Evening</div><div style="font-size:12px;margin:4px 0;">🐄 ${ec_}L · 🐃 ${eb_}L</div><div class="box-val" style="color:#7c3aed;">₹${ea_}</div></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-num">₹${ta_}</div><div class="stat-lbl">Total Collection</div></div>
+        <div class="stat"><div class="stat-num" style="color:#0891b2;">${tc_}L</div><div class="stat-lbl">🐄 Cow</div></div>
+        <div class="stat"><div class="stat-num" style="color:#7c3aed;">${tb_}L</div><div class="stat-lbl">🐃 Buffalo</div></div>
+      </div>
+    </div>`;
+
+  const daywiseRows = datesData_.map(({dt, entries}) =>
+    entries.map((it, i) => `<tr>
+      <td>${i===0 ? dt : ''}</td>
+      <td><span class="sess ${it.s}">${it.s==='morning'?'☀️ Morning':'🌙 Evening'}</span></td>
+      <td>${it.r.cowLitres||0}</td>
+      <td>${it.r.buffaloLitres||0}</td>
+      <td style="font-weight:600;">₹${(it.r.amount||0).toFixed(0)}</td>
+    </tr>`).join('')
+  ).join('');
+
+  const daywiseHtml = `
+    <div class="section">
+      <div class="section-title">Day-wise Collection</div>
+      <table>
+        <thead><tr><th>Date</th><th>Session</th><th>🐄 Cow L</th><th>🐃 Buf L</th><th>Amount</th></tr></thead>
+        <tbody>
+          ${daywiseRows}
+          <tr class="total-row"><td>TOTAL</td><td></td><td>${tc_}L</td><td>${tb_}L</td><td>₹${ta_}</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+
+  const payRows = periodPaymentsData_.map(p => `<tr>
+    <td>${p.paidAt?p.paidAt.substring(0,10):''}</td>
+    <td class="green" style="font-weight:700;">₹${(p.paidAmount||0).toFixed(0)}</td>
+    <td>${p.note||'Cash'}</td>
+    <td class="muted">${p.remarks||'—'}</td>
+  </tr>`).join('');
+
+  const paymentsHtml = `
+    <div class="section">
+      <div class="section-title">Payment History</div>
+      ${periodPaymentsData_.length ? `
+      <table>
+        <thead><tr><th>Date</th><th>Amount</th><th>Mode</th><th>Remarks</th></tr></thead>
+        <tbody>
+          ${payRows}
+          <tr class="total-row"><td>Total Paid</td><td class="green">₹${periodPaid_}</td><td></td><td></td></tr>
+        </tbody>
+      </table>` : '<p class="muted">No payments in this period.</p>'}
+      <div class="bal-row">
+        <div class="formula">Opening (${openStr_}) + Collection (₹${ta_}) − Paid (₹${periodPaid_})</div>
+        <div style="font-size:16px;font-weight:700;${closingBal_>0?'color:#d97706':closingBal_<0?'color:#059669':'color:#888'}">${closeStr_}</div>
+      </div>
+    </div>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>${name} — ${period} ${cycle}</title>
+  <style>${css}</style></head><body>
+  <h2>Yogesh Dairy</h2>
+  <div class="sub">${name} · ${period} · ${cycle} · 🐄 ₹${cowRate_}/L · 🐃 ₹${bufRate_}/L</div>
+  ${summaryHtml}${daywiseHtml}${paymentsHtml}
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// =========================================================
+// OUTSTANDING LEDGER
+// =========================================================
+
+let osCurrentView = 'all'; // 'all' or 'single'
+let osCycleViewMode = 'month'; // 'month' or 'cycle'
+
+function osView(v) {
+  osCurrentView = v;
+  document.getElementById('os-all-btn').classList.toggle('active', v==='all');
+  document.getElementById('os-single-btn').classList.toggle('active', v==='single');
+  document.querySelectorAll('.os-single-only').forEach(el => el.classList.toggle('hidden', v!=='single'));
+  // cycle toggle only makes sense in all-vendors view
+  document.getElementById('os-cycle-toggle').style.display = v==='all' ? '' : 'none';
+  renderOutstanding();
+}
+
+function osCycleView(mode) {
+  osCycleViewMode = mode;
+  document.getElementById('os-month-btn').classList.toggle('active', mode==='month');
+  document.getElementById('os-cycle-btn').classList.toggle('active', mode==='cycle');
+  renderOutstanding();
+}
+
+function initOutstanding() {
+  const now = new Date();
+  document.getElementById('os-mo').value = now.getMonth();
+  document.getElementById('os-yr').value = now.getFullYear();
+  // Populate vendor selector
+  const sel = document.getElementById('os-vid');
+  sel.innerHTML = '<option value="">Select Vendor</option>' + V.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');
+}
+
+// Returns all cycles from first ever collection to given month/year end
+function getAllCyclesUpTo(yr, mo) {
+  if (!C.length) return [];
+  // Find earliest date in collection
+  const earliest = C.map(r=>r.date).sort()[0];
+  if (!earliest) return [];
+  const [ey, em] = earliest.split('-').map(Number);
+  const cycles = [];
+  let cy = ey, cm = em - 1; // cm is 0-indexed month
+  const endYr = yr, endMo = mo; // 0-indexed
+  while (cy < endYr || (cy === endYr && cm <= endMo)) {
+    [1,2,3].forEach(cyc => {
+      const {s, e} = cycleDates(cy, cm, cyc);
+      // Only include cycles up to end of selected month
+      const cycEnd = `${endYr}-${String(endMo+1).padStart(2,'0')}-31`;
+      if (s <= cycEnd) cycles.push({yr:cy, mo:cm, cyc, s, e});
+    });
+    cm++;
+    if (cm > 11) { cm = 0; cy++; }
+  }
+  return cycles;
+}
+
+// Core: calculate running ledger for one vendor across all cycles up to selected month
+// Returns array of cycle rows with: opening, gross, paid, closing
+function calcVendorLedger(vid, toYr, toMo) {
+  const cycles = getAllCyclesUpTo(toYr, toMo);
+  let runBal = 0; // positive = we owe vendor (debit), negative = vendor advance (credit)
+  const rows = [];
+  cycles.forEach(({yr, mo, cyc, s, e}) => {
+    const opening = runBal;
+    const vc = C.filter(r => r.vendorId === vid && r.date >= s && r.date <= e);
+    const gross = vc.reduce((a,r) => a + (r.amount||0), 0);
+    // Sum all payments whose paidAt date falls within this cycle's date range
+    const paid = P.filter(p => {
+      if (p.vendorId !== vid) return false;
+      const pd = p.paidAt ? p.paidAt.substring(0,10) : '';
+      return pd >= s && pd <= e;
+    }).reduce((a,p) => a + (p.paidAmount||0), 0);
+    const closing = opening + gross - paid;
+    runBal = closing;
+    if (yr === toYr && mo === toMo) {
+      rows.push({ yr, mo, cyc, s, e, opening, gross, paid, closing });
+    }
+  });
+  return { rows, finalBalance: runBal };
+}
+
+function renderOutstanding() {
+  const mo = parseInt(document.getElementById('os-mo').value);
+  const yr = parseInt(document.getElementById('os-yr').value);
+  const out = document.getElementById('outstanding-out');
+  if (!V.length) { out.innerHTML = '<div class="card"><div class="empty"><div class="ico">👤</div><p>No vendors yet.</p></div></div>'; return; }
+  const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  if (osCurrentView === 'all') {
+    if (osCycleViewMode === 'cycle') renderOutstandingCycleWise(mo, yr, MN, out);
+    else renderOutstandingAll(mo, yr, MN, out);
+  } else {
+    const vid = document.getElementById('os-vid').value;
+    if (!vid) { out.innerHTML = '<div class="card"><div class="empty"><div class="ico">👤</div><p>Select a vendor to view ledger.</p></div></div>'; return; }
+    renderOutstandingSingle(vid, mo, yr, MN, out);
+  }
+}
+
+function renderOutstandingAll(mo, yr, MN, out) {
+  let totalDebit = 0, totalCredit = 0, totalSettled = 0;
+  const rows = V.map(v => {
+    const { rows: cycRows, finalBalance } = calcVendorLedger(v.id, yr, mo);
+    const bal = finalBalance; // balance at END of selected month
+    if (bal > 0.005) totalDebit += bal;
+    else if (bal < -0.005) totalCredit += Math.abs(bal);
+    else totalSettled++;
+    return { v, bal, cycRows };
+  }).sort((a,b) => Math.abs(b.bal) - Math.abs(a.bal));
+
+  const summaryHtml = `
+    <div class="card">
+      <div class="card-title"><span>📊</span> Summary — ${MN[mo]} ${yr}</div>
+      <div class="summary-grid">
+        <div class="summary-box">
+          <div class="snum os-debit">₹${totalDebit.toFixed(0)}</div>
+          <div class="slbl">Total Debit (We Owe)</div>
+        </div>
+        <div class="summary-box">
+          <div class="snum os-credit">₹${totalCredit.toFixed(0)}</div>
+          <div class="slbl">Total Advance (Vendor Overpaid)</div>
+        </div>
+        <div class="summary-box">
+          <div class="snum os-zero">${totalSettled}</div>
+          <div class="slbl">Fully Settled</div>
+        </div>
+      </div>
+    </div>`;
+
+  const vendorCards = rows.map(({v, bal, cycRows}) => {
+    const balClass = bal > 0.005 ? 'os-debit' : bal < -0.005 ? 'os-credit' : 'os-zero';
+    const balLabel = bal > 0.005 ? '🔴 We Owe' : bal < -0.005 ? '🟢 Advance' : '✅ Settled';
+    const balDisplay = bal > 0.005 ? `₹${bal.toFixed(0)}` : bal < -0.005 ? `₹${Math.abs(bal).toFixed(0)} advance` : '₹0';
+
+    // Cycle breakdown for this month
+    const cycleDetail = cycRows.map(row => {
+      const cBal = row.closing;
+      const cClass = cBal > 0.005 ? 'os-debit' : cBal < -0.005 ? 'os-credit' : 'os-zero';
+      return `<div class="ledger-row">
+        <div>
+          <div class="ledger-cycle">Cycle ${cycleName(row.cyc)} (${fmtDate(row.s)}–${fmtDate(row.e)})</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+            Opening: <span style="color:${row.opening>0.005?'var(--morning)':row.opening<-0.005?'var(--green)':'var(--muted)'};">₹${row.opening.toFixed(0)}</span>
+            &nbsp;+&nbsp; Gross: <span style="color:var(--accent);">₹${row.gross.toFixed(0)}</span>
+            &nbsp;−&nbsp; Paid: <span style="color:var(--green);">₹${row.paid.toFixed(0)}</span>
+          </div>
+        </div>
+        <div class="ledger-val ${cClass}">₹${Math.abs(cBal).toFixed(0)}<br><span style="font-size:9px;font-weight:400;">${cBal>0.005?'due':cBal<-0.005?'advance':'settled'}</span></div>
+      </div>`;
+    }).join('') || `<div style="font-size:12px;color:var(--muted);padding:10px 0;">No collection this month</div>`;
+
+    return `<div class="os-card">
+      <div class="os-header" onclick="this.nextElementSibling.classList.toggle('hidden')">
+        <div class="vendor-avatar" style="width:34px;height:34px;font-size:13px;">${v.name[0].toUpperCase()}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:14px;">${v.name}</div>
+          <div style="font-size:11px;color:var(--muted);">${balLabel}</div>
+        </div>
+        <div class="ledger-val ${balClass}" style="font-size:16px;">${balDisplay}</div>
+      </div>
+      <div class="os-body hidden">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;padding:10px 0 6px;">This Month Cycle Breakdown</div>
+        ${cycleDetail}
+        <div class="ledger-total-row">
+          <span>Closing Balance — ${MN[mo]} ${yr}</span>
+          <span class="${balClass}">${balDisplay}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  out.innerHTML = summaryHtml + vendorCards;
+}
+
+function renderOutstandingCycleWise(mo, yr, MN, out) {
+  const cycles = [1, 2, 3];
+  let html = `<div class="card" style="margin-bottom:12px;">
+    <div class="card-title"><span>🔄</span> Cycle-wise Breakdown — ${MN[mo]} ${yr}</div>
+    <p style="font-size:11px;color:var(--muted);">Opening balance + collection in cycle − payments in cycle = closing balance. Each cycle has its own PDF button.</p>
+  </div>`;
+
+  cycles.forEach(cyc => {
+    const { s, e } = cycleDates(yr, mo, cyc);
+    let cycGross = 0, cycPaid = 0;
+    const rows = V.map(v => {
+      const prevCycles = getAllCyclesUpTo(yr, mo).filter(c => c.s < s);
+      let runBal = 0;
+      prevCycles.forEach(c => {
+        const vc = C.filter(r => r.vendorId === v.id && r.date >= c.s && r.date <= c.e);
+        const gross = vc.reduce((a,r) => a+(r.amount||0), 0);
+        const paid = P.filter(p => p.vendorId===v.id && p.paidAt && p.paidAt.substring(0,10) >= c.s && p.paidAt.substring(0,10) <= c.e).reduce((a,p) => a+(p.paidAmount||0), 0);
+        runBal += gross - paid;
+      });
+      const opening = runBal;
+      const vc = C.filter(r => r.vendorId === v.id && r.date >= s && r.date <= e);
+      const gross = vc.reduce((a,r) => a+(r.amount||0), 0);
+      const paid = P.filter(p => p.vendorId===v.id && p.paidAt && p.paidAt.substring(0,10) >= s && p.paidAt.substring(0,10) <= e).reduce((a,p) => a+(p.paidAmount||0), 0);
+      const closing = opening + gross - paid;
+      cycGross += gross; cycPaid += paid;
+      return { v, opening, gross, paid, closing };
+    }).filter(r => r.gross > 0 || Math.abs(r.opening) > 0.005);
+
+    // Build table rows HTML for this cycle (stored in hidden div for PDF)
+    const tableRowsHtml = rows.map(({v, opening, gross, paid, closing}) => {
+      const cClass = closing > 0.005 ? 'color:var(--morning)' : closing < -0.005 ? 'color:var(--green)' : 'color:var(--muted)';
+      const oStr = opening > 0.005 ? `<span style="color:var(--morning);">₹${opening.toFixed(0)}</span>` : opening < -0.005 ? `<span style="color:var(--green);">-₹${Math.abs(opening).toFixed(0)}</span>` : '—';
+      return `<tr>
+        <td style="font-weight:600;">${v.name}</td>
+        <td style="text-align:right;">${oStr}</td>
+        <td style="text-align:right;color:var(--accent);">${gross > 0 ? '₹'+gross.toFixed(0) : '—'}</td>
+        <td style="text-align:right;color:var(--green);">${paid > 0 ? '₹'+paid.toFixed(0) : '—'}</td>
+        <td style="text-align:right;font-weight:800;${cClass};">${closing > 0.005 ? '₹'+closing.toFixed(0) : closing < -0.005 ? '-₹'+Math.abs(closing).toFixed(0) : '✅'}</td>
+      </tr>`;
+    }).join('');
+
+    html += `<div class="card" style="margin-bottom:12px;" id="cycle-card-${cyc}">
+      <div class="card-title" style="margin-bottom:10px;">
+        <span>📅</span> Cycle ${cycleName(cyc)} &nbsp;<span style="font-size:11px;color:var(--muted);font-weight:400;">${fmtDate(s)} – ${fmtDate(e)}</span>
+        <span style="margin-left:6px;font-size:12px;color:var(--accent);">Coll ₹${cycGross.toFixed(0)} · Paid ₹${cycPaid.toFixed(0)}</span>
+        <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="printCycleWise(${cyc},'${MN[mo]} ${yr}','${fmtDate(s)}','${fmtDate(e)}')">📤 PDF</button>
+      </div>
+      ${!rows.length ? '<div style="font-size:12px;color:var(--muted);padding:8px 0;">No collection in this cycle</div>' :
+      `<div style="overflow-x:auto;"><table class="data-table">
+        <thead><tr>
+          <th>Vendor</th><th style="text-align:right;">Opening</th><th style="text-align:right;">Collection</th><th style="text-align:right;">Paid</th><th style="text-align:right;">Closing</th>
+        </tr></thead>
+        <tbody>${tableRowsHtml}</tbody>
+      </table></div>`}
+    </div>`;
+  });
+
+  out.innerHTML = html;
+}
+
+function printCycleWise(cyc, period, dateFrom, dateTo) {
+  const el = document.getElementById(`cycle-card-${cyc}`);
+  if (!el) return;
+  const table = el.querySelector('table');
+  const tableHtml = table ? table.outerHTML : '<p>No data for this cycle.</p>';
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Cycle ${cyc} Outstanding — ${period}</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:20px;color:#111;background:#fff;font-size:13px;}
+    h2{margin:0 0 4px;font-size:18px;}
+    .sub{color:#666;font-size:12px;margin-bottom:16px;}
+    table{width:100%;border-collapse:collapse;margin-top:8px;}
+    th{background:#f5a623;color:#fff;padding:8px 10px;text-align:left;font-size:12px;}
+    td{padding:8px 10px;border-bottom:1px solid #eee;font-size:12px;}
+    @media print{button{display:none!important;}}
+  </style></head><body>
+  <h2>Yogesh Dairy — Cycle ${cyc} Outstanding</h2>
+  <div class="sub">${period} · Cycle ${cyc} · ${dateFrom} to ${dateTo}</div>
+  ${tableHtml}
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+function renderOutstandingSingle(vid, mo, yr, MN, out) {
+  const v = V.find(x => x.id === vid);
+  if (!v) return;
+  const { rows } = calcVendorLedger(v.id, yr, mo);
+
+  if (!rows.length) {
+    out.innerHTML = `<div class="card"><div class="empty"><div class="ico">📭</div><p>No data for ${v.name} in ${MN[mo]} ${yr}.</p></div></div>`;
+    return;
+  }
+
+  const monthGross = rows.reduce((a,r) => a+r.gross, 0);
+  const monthPaid  = rows.reduce((a,r) => a+r.paid, 0);
+  const openingBal = rows[0].opening;
+  const closingBal = rows[rows.length-1].closing;
+  const balClass = closingBal > 0.005 ? 'os-debit' : closingBal < -0.005 ? 'os-credit' : 'os-zero';
+
+  const summaryHtml = `
+    <div class="card">
+      <div class="card-title"><span>👤</span> ${v.name} — ${MN[mo]} ${yr}</div>
+      <div class="summary-grid">
+        <div class="summary-box">
+          <div class="snum" style="color:${openingBal>0.005?'var(--morning)':openingBal<-0.005?'var(--green)':'var(--muted)'};">
+            ${openingBal>0.005?'₹'+openingBal.toFixed(0):openingBal<-0.005?'₹'+Math.abs(openingBal).toFixed(0)+' adv':'₹0'}
+          </div>
+          <div class="slbl">Opening Balance</div>
+        </div>
+        <div class="summary-box">
+          <div class="snum" style="color:var(--accent);">₹${monthGross.toFixed(0)}</div>
+          <div class="slbl">Total Collection</div>
+        </div>
+        <div class="summary-box">
+          <div class="snum" style="color:var(--green);">₹${monthPaid.toFixed(0)}</div>
+          <div class="slbl">Total Paid</div>
+        </div>
+      </div>
+    </div>`;
+
+  const ledgerHtml = `
+    <div class="card">
+      <div class="card-title"><span>📒</span> Cycle Ledger</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;">
+        <!-- Header -->
+        <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);border-bottom:1px solid var(--border);">
+          <div>Cycle</div><div style="text-align:right;">Opening</div><div style="text-align:right;">Gross</div><div style="text-align:right;">Paid</div><div style="text-align:right;">Closing</div>
+        </div>
+        ${rows.map(row => {
+          const cClass = row.closing > 0.005 ? 'os-debit' : row.closing < -0.005 ? 'os-credit' : 'os-zero';
+          const oClass = row.opening > 0.005 ? 'os-debit' : row.opening < -0.005 ? 'os-credit' : 'os-zero';
+          const oLabel = row.opening > 0.005 ? '↑ b/f' : row.opening < -0.005 ? '↑ adv' : '';
+          return `<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;">
+            <div>
+              <div style="font-weight:700;">Cycle ${cycleName(row.cyc)}</div>
+              <div style="font-size:10px;color:var(--muted);">${fmtDate(row.s)}–${fmtDate(row.e)}</div>
+            </div>
+            <div style="text-align:right;" class="${oClass}">${row.opening!==0?'₹'+Math.abs(row.opening).toFixed(0)+'<br><span style="font-size:9px;">'+oLabel+'</span>':'—'}</div>
+            <div style="text-align:right;color:var(--accent);font-weight:600;">${row.gross>0?'₹'+row.gross.toFixed(0):'—'}</div>
+            <div style="text-align:right;color:var(--green);font-weight:600;">${row.paid>0?'₹'+row.paid.toFixed(0):'—'}</div>
+            <div style="text-align:right;font-weight:800;" class="${cClass}">${'₹'+Math.abs(row.closing).toFixed(0)}<br><span style="font-size:9px;font-weight:400;">${row.closing>0.005?'due':row.closing<-0.005?'adv':'✅'}</span></div>
+          </div>`;
+        }).join('')}
+        <div class="ledger-total-row">
+          <span>Closing Balance</span>
+          <span class="${balClass}" style="font-size:15px;">${closingBal>0.005?'₹'+closingBal.toFixed(0)+' (we owe)':closingBal<-0.005?'₹'+Math.abs(closingBal).toFixed(0)+' advance':'✅ Settled'}</span>
+        </div>
+      </div>
+    </div>`;
+
+  out.innerHTML = summaryHtml + ledgerHtml;
+}
+// =========================================================
+function renderSecStatus() {
+  const el = document.getElementById('sec-sheet-status');
+  el.innerHTML = sheetUrl
+    ? `<span style="color:var(--green);">✅ Connected to Google Sheets</span><br><span style="font-size:11px;color:var(--muted);word-break:break-all;">${sheetUrl.substring(0,70)}...</span>`
+    : `<span style="color:var(--red);">❌ Not connected — set up Google Sheets sync</span>`;
+  // Show current PINs status
+  const pinInfo = document.getElementById('sec-pin-info');
+  if (pinInfo) {
+    pinInfo.innerHTML = `
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+        <span class="role-badge role-manager">👔 Manager PIN: ${getMgrPin().replace(/./g,'•')}</span>
+        <span class="role-badge role-operator">👷 Operator PIN: ${getOpPin().replace(/./g,'•')}</span>
+      </div>`;
+  }
+}
+
+// =========================================================
+// GOOGLE SHEETS
+// =========================================================
+function updateSyncUI() {
+  const dot=document.getElementById('sync-dot'), lbl=document.getElementById('sync-lbl'), btn=document.getElementById('sync-btn');
+  if (sheetUrl) { dot.className='sync-dot on'; lbl.textContent='🔄 Refresh'; btn.className='sync-btn connected'; }
+  else { dot.className='sync-dot'; lbl.textContent='Setup Sync'; btn.className='sync-btn'; }
+}
+
+function openSettings() {
+  document.getElementById('sheet-url').value=sheetUrl;
+  document.getElementById('conn-status').textContent='';
+  document.getElementById('settings-modal').classList.remove('hidden');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
+
+async function connectSheet() {
+  const url=document.getElementById('sheet-url').value.trim();
+  if (!url) { toast('Enter the Apps Script URL','error'); return; }
+  const btn=document.getElementById('conn-btn'), st=document.getElementById('conn-status');
+  btn.innerHTML='<div class="spinner"></div> Connecting...'; btn.disabled=true;
+  st.textContent='Connecting & loading data from sheet...';
+  try {
+    const r=await fetch(url+'?action=getAll');
+    const d=await r.json();
+    if (d.success!==undefined) {
+      sheetUrl=url; localStorage.setItem('yd_url',sheetUrl);
+      updateSyncUI();
+      await loadSheet(d);
+      st.textContent=`✅ Connected! Loaded ${V.length} vendors, ${C.length} collection records.`;
+      st.style.color='var(--green)';
+      toast('✅ Connected & all data loaded!');
+      setTimeout(closeSettings, 2000);
+    } else throw new Error('Bad response');
+  } catch(err) {
+    st.textContent='❌ Connection failed. Check URL & ensure deployment is set to "Anyone".';
+    st.style.color='var(--red)';
+  }
+  btn.innerHTML='🔗 Connect & Load Data'; btn.disabled=false;
+}
+
+async function pullFromSheet() {
+  if (!sheetUrl) { toast('Not connected','error'); return; }
+  showLoadingBanner();
+  pull(false);
+}
+
+async function pull(silent=false) {
+  if (!sheetUrl) return;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    let r;
+    try {
+      r = await fetch(sheetUrl + '?action=getAll', { signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!r.ok && r.status !== 0) throw new Error('HTTP ' + r.status);
+    const text = await r.text();
+    let d;
+    try { d = JSON.parse(text); }
+    catch(e) { throw new Error('Bad response — re-deploy Apps Script'); }
+    if (!d.success) throw new Error('Sheet error: ' + (d.error||'unknown'));
+    await loadSheet(d);
+    hideLoadingBanner();
+    if (!silent) toast('✅ Data refreshed!');
+  } catch(e) {
+    console.warn('Pull error:', e);
+    hideLoadingBanner();
+    const isTimeout = e.name === 'AbortError';
+    const msg = isTimeout ? '⏱️ Sheet sync timed out — tap Retry in ⚙️' : '❌ Sync failed: ' + e.message;
+    toast(msg, 'error');
+    // Show retry button in dashboard if empty (first load)
+    if (!V.length && !C.length) {
+      const html = `<div style="text-align:center;padding:30px 20px;">
+        <div style="font-size:40px;margin-bottom:12px;">${isTimeout?'⏱️':'📵'}</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px;">${isTimeout?'Sync Timed Out':'Could Not Load Data'}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6;">${e.message}</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="retryLoad()">🔄 Retry</button>
+          <button class="btn btn-outline btn-sm" onclick="openSettings()">⚙️ Check URL</button>
+        </div>
+      </div>`;
+      document.getElementById('dash-content').innerHTML = html;
+    }
+  }
+}
+
+async function loadSheet(d) {
+  // Always replace from sheet — sheet is single source of truth
+  V=[];C=[];P=[];
+  if (d.vendors) d.vendors.forEach(sv=>V.push({
+    id:String(sv.ID).trim(),
+    name:sv.Name||'',
+    phone:sv.Phone||'',
+    address:sv.Address||'',
+    cowRate:parseFloat(sv.CowRate)||0,
+    buffaloRate:parseFloat(sv.BuffaloRate)||0,
+    cowEnabled: parseBool(sv.CowEnabled),
+    buffaloEnabled: parseBool(sv.BuffaloEnabled)
+  }));
+  if (d.collections) d.collections.forEach(sc=>{
+    const date = sheetDate(sc.Date);
+    C.push({
+      id:String(sc.ID).trim(),
+      date,
+      session:String(sc.Session||'').toLowerCase().trim(),
+      vendorId:String(sc.VendorID).trim(),
+      vendorName:sc.VendorName||'',
+      cowLitres:parseFloat(sc.CowLitres)||0,
+      buffaloLitres:parseFloat(sc.BuffaloLitres)||0,
+      cowRate:parseFloat(sc.CowRate)||0,
+      buffaloRate:parseFloat(sc.BuffaloRate)||0,
+      amount:parseFloat(sc.Amount)||0
+    });
+  });
+  if (d.payments) d.payments.forEach(sp=>{
+    const vid = String(sp.VendorID||'').trim();
+    P.push({
+      id:        String(sp.ID||'').trim(),
+      vendorId:  vid,
+      vendorName:sp.VendorName||'',
+      paidAmount:parseFloat(sp.PaidAmount)||0,
+      note:      sp.Note||sp.Mode||'',
+      remarks:   sp.Remarks||'',
+      paidAt:    String(sp.PaidAt||sp.paidAt||'')
+    });
+  });
+  renderActiveTab();
+}
+
+function renderActiveTab() {
+  const active = document.querySelector('.tab-btn.active')?.dataset?.tab || 'dashboard';
+  if (active === 'dashboard') renderDash();
+  else if (active === 'vendors') renderVList();
+  else if (active === 'collection') { collBuildDropdown(); collRenderDone(); }
+  else if (active === 'payments') renderPay();
+  // always keep dashboard stat badges fresh
+  if (active !== 'dashboard') renderDash();
+}
+
+async function sync(action, payload) {
+  if (!sheetUrl) return false;
+  try {
+    const body=new FormData();
+    body.append('action',action);
+    body.append('payload',JSON.stringify(payload));
+    await fetch(sheetUrl,{method:'POST',mode:'no-cors',body});
+    return true;
+  } catch(e) { console.warn('Sync failed:',e); return false; }
+}
+
+function disconnectSheet() {
+  if (!confirm('Disconnect from Google Sheets?\nData will not be accessible until reconnected.')) return;
+  sheetUrl=''; localStorage.removeItem('yd_url');
+  V=[];C=[];P=[];
+  updateSyncUI(); closeSettings(); renderDash(); renderVList();
+  toast('Disconnected');
+}
+
+// =========================================================
+// START
+// =========================================================
+initLogin();
+</script>
+</body>
+</html>
