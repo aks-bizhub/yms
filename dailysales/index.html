@@ -56,6 +56,12 @@
   .missing-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:7px;background:#fff;}
   .missing-row .m-label{font-size:14px;}
   .retry-btn{background:#fff;border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:8px;font-size:13px;width:100%;margin-top:8px;cursor:pointer;}
+  .table-scroll{overflow-x:auto;margin-top:10px;-webkit-overflow-scrolling:touch;}
+  .preview-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .preview-table th,.preview-table td{padding:7px 9px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;}
+  .preview-table th:first-child,.preview-table td:first-child{text-align:left;}
+  .preview-table thead th{color:var(--muted);font-weight:600;background:var(--accent);position:sticky;top:0;}
+  .preview-table tr.total-row td{font-weight:700;color:var(--primary-dark);border-top:2px solid var(--border);background:var(--accent);}
 </style>
 </head>
 <body>
@@ -541,11 +547,39 @@ function previewReport(){
   box.innerHTML = '<div class="foot-note">Loading…</div>';
   callApiWithRetry({ action:'getEntries', startDate:start, endDate:end }).then(res=>{
     if (!res.success) { throw new Error(res.message || 'Failed to load'); }
-    const totalDays = res.entries.length;
-    const grand = res.entries.reduce((sum,e)=>sum+e.total,0);
+    const entries = res.entries;
+    if (!entries.length) { box.innerHTML = '<div class="msg error">No entries in this period.</div>'; return; }
+
+    const sums = entries.reduce((a,e)=>{
+      a.milk += e.milk; a.iceCream += e.iceCream; a.sweet += e.sweet; a.total += e.total;
+      return a;
+    }, { milk:0, iceCream:0, sweet:0, total:0 });
+
+    const rows = entries.map(e => `<tr>
+        <td>${e.dateDisplay}</td>
+        <td>${e.milk.toFixed(2)}</td>
+        <td>${e.iceCream.toFixed(2)}</td>
+        <td>${e.sweet.toFixed(2)}</td>
+        <td>${e.total.toFixed(2)}</td>
+      </tr>`).join('');
+
     box.innerHTML = `
-      <div class="summary-row"><span>Entries found</span><b>${totalDays}</b></div>
-      <div class="summary-row"><span>Total Sales</span><b>₹${grand.toFixed(2)}</b></div>`;
+      <div class="summary-row"><span>Entries found</span><b>${entries.length}</b></div>
+      <div class="table-scroll">
+        <table class="preview-table">
+          <thead><tr><th>Date</th><th>Milk etc.</th><th>Ice-cream</th><th>Sweet</th><th>Total</th></tr></thead>
+          <tbody>
+            ${rows}
+            <tr class="total-row">
+              <td>Total</td>
+              <td>${sums.milk.toFixed(2)}</td>
+              <td>${sums.iceCream.toFixed(2)}</td>
+              <td>${sums.sweet.toFixed(2)}</td>
+              <td>${sums.total.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`;
   }).catch(err=>{
     box.innerHTML = '<div class="msg error">'+err.message+'</div>'
       + '<button class="retry-btn" onclick="previewReport()">Retry</button>';
