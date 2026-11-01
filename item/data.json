@@ -89,39 +89,31 @@
    "items": [
     [
      "Elichi Shrikhand",
-     240
-    ],
-    [
-     "Kesar Shrikhand",
      260
     ],
     [
+     "Kesar Shrikhand",
+     280
+    ],
+    [
      "Mango Mattho",
-     280
-    ],
-    [
-     "Chocolate Shrikhand",
-     280
-    ],
-    [
-     "Butter Scotch",
-     220
-    ],
-    [
-     "Fruit Mattho",
      300
     ],
     [
-     "Dryfruit Shrikhand",
+     "Fruit Mattho",
      320
+    ],
+    [
+     "Dryfruit Shrikhand",
+     340
     ],
     [
      "American Dryfruit Shrikhand",
-     320
+     340
     ],
     [
      "Rajbhog Shrikhand",
-     320
+     340
     ]
    ],
    "small": "250 g"
@@ -148,7 +140,7 @@
     ],
     [
      "Kesar Penda",
-     600
+     620
     ]
    ],
    "small": "250 g"
@@ -230,7 +222,7 @@
     ],
     [
      "Anjeer Barfi",
-     600
+     620
     ]
    ],
    "small": "250 g"
