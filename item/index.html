@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yogesh Milk & Sweet – Item Catalog, Dabhoi</title>
+<meta name="theme-color" content="#7a1f2b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Hind:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf5ea; --card:#fffdf8; --ink:#2b1a14; --muted:#7b6a60;
+  --brand:#7a1f2b; --brand-ink:#fff; --saffron:#e08a12; --line:#eadfcc;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1d1412; --card:#291c19; --ink:#f6eadb; --muted:#b9a698;
+    --brand:#e8a33d; --brand-ink:#2b1a14; --saffron:#e8a33d; --line:#40302b;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:128px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Hind,system-ui,sans-serif;font-size:16px;line-height:1.4}
+header{background:#7a1f2b;color:#fff3dc;padding:28px 18px 22px;text-align:center}
+header h1{font-family:Fraunces,Georgia,serif;font-weight:800;font-size:clamp(26px,7vw,38px);margin:0;letter-spacing:.2px}
+header p{margin:6px 0 0;opacity:.85;font-size:15px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 14px 8px;border-bottom:1px solid var(--line)}
+.search{width:100%;padding:11px 14px;font:inherit;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.search:focus{outline:2px solid var(--saffron);outline-offset:1px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.tab:focus-visible{outline:2px solid var(--saffron)}
+.tab.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+main{max-width:720px;margin:0 auto;padding:6px 14px 40px}
+section{margin-top:22px}
+h2{font-family:Fraunces,Georgia,serif;font-size:22px;margin:0 0 8px;display:flex;align-items:baseline;gap:10px}
+h2 small{font-family:Hind,sans-serif;font-weight:500;font-size:14px;color:var(--muted)}
+ul{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:12px}
+li{display:flex;align-items:baseline;gap:8px;padding:11px 14px}
+li+li{border-top:1px solid var(--line)}
+.n{flex:none}
+.dots{flex:1;border-bottom:2px dotted var(--line);transform:translateY(-4px);min-width:12px}
+.p{flex:none;font-weight:600;font-variant-numeric:tabular-nums}
+.p i{font-style:normal;font-weight:400;color:var(--muted);font-size:13px}
+.empty{text-align:center;color:var(--muted);padding:40px 0}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:0 18px 34px}
+footer b{color:var(--ink)}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="shop">Yogesh Milk &amp; Sweet</h1>
+  <p id="place">Dabhoi</p>
+</header>
+<div class="bar">
+  <input class="search" id="q" type="search" placeholder="Search item…" aria-label="Search item" autocomplete="off">
+  <div class="tabs" id="tabs"></div>
+</div>
+<main id="list"></main>
+<footer>Prices in ₹ and may change. <span id="upd"></span></footer>
+
+<script>
+// Fallback data (used if items.json cannot be loaded). Keep in sync with items.json.
+var FALLBACK = {"shop": "Yogesh Milk & Sweet", "place": "Dabhoi", "updated": "2026-11-01", "categories": [{"name": "Milk & Curd", "unit": "", "items": [["Milk B", 70], ["Milk C", 54], ["Hot Milk", 72], ["Dahi", 90], ["Chhash", 10]]}, {"name": "Paneer, Butter & Ghee", "unit": "kg", "items": [["Paneer", 440], ["Butter", 700], ["Cream", 380], ["Ghee", 760], ["Cow Ghee", 840]]}, {"name": "Basundi, Mava & Ras", "unit": "kg", "items": [["Basundi", 340], ["Kesar Basundi", 400], ["Ras", 125], ["Mava", 340], ["Mava Mix", 520]]}, {"name": "Shrikhand", "unit": "kg", "items": [["Elichi Shrikhand", 240], ["Kesar Shrikhand", 260], ["Mango Mattho", 280], ["Chocolate Shrikhand", 280], ["Butter Scotch", 220], ["Fruit Mattho", 300], ["Dryfruit Shrikhand", 320], ["American Dryfruit Shrikhand", 320], ["Rajbhog Shrikhand", 320]]}, {"name": "Penda", "unit": "kg", "items": [["Mathura Penda", 440], ["Malai Penda", 460], ["Chocolate Penda", 520], ["Badami Penda", 520], ["Kesar Penda", 600]]}, {"name": "Traditional Sweets", "unit": "kg", "items": [["Bundi", 220], ["Bundi Ladu", 240], ["Gulab Jamun", 260], ["Motichoor Ladoo", 360], ["Kala Jamun", 400], ["Maysur", 440], ["Magas", 460], ["Milk Cake", 500], ["Mohanthar", 500], ["Kesar Modak", 640]]}, {"name": "Barfi & Halwa", "unit": "kg", "items": [["Dudhi Halwa", 440], ["Gajar Halwa", 480], ["Malai Barfi", 500], ["Mango Barfi", 500], ["Chocolate Barfi", 500], ["Kopra Pak", 500], ["Anjeer Barfi", 600]]}, {"name": "Kaju Sweets", "unit": "kg", "items": [["Kaju Katli", 1100], ["Kesar Kaju Katli", 1200], ["Badam Katli", 1200], ["Anjeer Katli", 1200], ["Kesar Kaju Roll", 1200], ["Kaju Mix", 1200], ["Anjeer Kaju Roll", 1300]]}, {"name": "Mix Mithai", "unit": "kg", "items": [["Mixed Mithai", 500], ["Special Mix", 600]]}, {"name": "250 g Packs", "unit": "250 g", "items": [["Gulab Jamun", 70], ["Motichoor", 95], ["Kala Jamun", 105], ["Mathura Penda", 115], ["Malai Penda", 120], ["Sweet (64)", 120], ["Mix Mithai", 125], ["Sweet (67)", 125], ["Barfi", 130], ["Badami Penda", 135], ["Chocolate Penda", 135], ["Kesar Penda", 155], ["Anjeer Barfi", 155], ["Elichi Shrikhand", 65], ["Kesar Shrikhand", 70], ["Mango Mattho", 75], ["Dryfruit Shrikhand", 85]]}, {"name": "Ice Cream", "unit": "", "items": [["Ice Cream", 10]]}]};
+
+var DATA = null, active = "All";
+var $ = function(id){ return document.getElementById(id); };
+var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+
+function render(){
+  var q = $("q").value.trim().toLowerCase(), html = "";
+  DATA.categories.forEach(function(c){
+    if (active !== "All" && active !== c.name) return;
+    var rows = c.items.filter(function(i){ return !q || i[0].toLowerCase().indexOf(q) > -1; });
+    if (!rows.length) return;
+    html += '<section id="' + esc(c.name.replace(/\W+/g,"-")) + '"><h2>' + esc(c.name) +
+      (c.unit ? '<small>per ' + esc(c.unit) + '</small>' : '') + '</h2><ul>';
+    rows.forEach(function(i){
+      html += '<li><span class="n">' + esc(i[0]) + '</span><span class="dots"></span><span class="p">₹' + i[1] + '</span></li>';
+    });
+    html += '</ul></section>';
+  });
+  $("list").innerHTML = html || '<p class="empty">No item found.</p>';
+}
+
+function init(d){
+  DATA = d;
+  $("shop").textContent = d.shop.replace("&","&");
+  $("place").textContent = d.place;
+  document.title = d.shop + " – Item Catalog, " + d.place;
+  if (d.updated) $("upd").textContent = "Updated " + d.updated + ".";
+  var names = ["All"].concat(d.categories.map(function(c){ return c.name; }));
+  $("tabs").innerHTML = names.map(function(n){
+    return '<button class="tab' + (n === active ? ' on' : '') + '" data-n="' + esc(n) + '">' + esc(n) + '</button>';
+  }).join("");
+  render();
+}
+
+$("tabs").addEventListener("click", function(e){
+  var b = e.target.closest(".tab"); if (!b) return;
+  active = b.getAttribute("data-n");
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){ t.classList.toggle("on", t === b); });
+  render(); window.scrollTo({top:0});
+});
+$("q").addEventListener("input", render);
+
+// Fetch latest prices from items.json in the same GitHub repo
+fetch("items.json?v=" + Date.now())
+  .then(function(r){ if (!r.ok) throw 0; return r.json(); })
+  .then(init)
+  .catch(function(){
+    if (FALLBACK) init(FALLBACK);
+    else $("list").innerHTML = '<p class="empty">Could not load the catalog. Please check your internet and refresh.</p>';
+  });
+</script>
+</body>
+</html>
