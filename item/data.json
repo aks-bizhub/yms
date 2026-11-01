@@ -5,27 +5,37 @@
  "categories": [
   {
    "name": "Milk & Curd",
-   "unit": "",
+   "unit": "kg / Ltr",
    "items": [
     [
      "Milk B",
-     70
+     70,
+     null,
+     "Ltr"
     ],
     [
      "Milk C",
-     54
+     54,
+     null,
+     "Ltr"
     ],
     [
      "Hot Milk",
-     72
+     72,
+     null,
+     "Ltr"
     ],
     [
      "Dahi",
-     90
+     90,
+     null,
+     "kg"
     ],
     [
      "Chhash",
-     10
+     10,
+     null,
+     "glass"
     ]
    ]
   },
@@ -79,7 +89,8 @@
      "Mava Mix",
      520
     ]
-   ]
+   ],
+   "small": "250 g"
   },
   {
    "name": "Shrikhand",
@@ -121,7 +132,8 @@
      "Rajbhog Shrikhand",
      320
     ]
-   ]
+   ],
+   "small": "250 g"
   },
   {
    "name": "Penda",
@@ -147,7 +159,8 @@
      "Kesar Penda",
      600
     ]
-   ]
+   ],
+   "small": "250 g"
   },
   {
    "name": "Traditional Sweets",
@@ -193,7 +206,8 @@
      "Kesar Modak",
      640
     ]
-   ]
+   ],
+   "small": "250 g"
   },
   {
    "name": "Barfi & Halwa",
@@ -227,7 +241,8 @@
      "Anjeer Barfi",
      600
     ]
-   ]
+   ],
+   "small": "250 g"
   },
   {
    "name": "Kaju Sweets",
@@ -261,7 +276,8 @@
      "Anjeer Kaju Roll",
      1300
     ]
-   ]
+   ],
+   "small": "250 g"
   },
   {
    "name": "Mix Mithai",
@@ -275,91 +291,9 @@
      "Special Mix",
      600
     ]
-   ]
-  },
-  {
-   "name": "250 g Packs",
-   "unit": "250 g",
-   "items": [
-    [
-     "Gulab Jamun",
-     70
-    ],
-    [
-     "Motichoor",
-     95
-    ],
-    [
-     "Kala Jamun",
-     105
-    ],
-    [
-     "Mathura Penda",
-     115
-    ],
-    [
-     "Malai Penda",
-     120
-    ],
-    [
-     "Sweet (64)",
-     120
-    ],
-    [
-     "Mix Mithai",
-     125
-    ],
-    [
-     "Sweet (67)",
-     125
-    ],
-    [
-     "Barfi",
-     130
-    ],
-    [
-     "Badami Penda",
-     135
-    ],
-    [
-     "Chocolate Penda",
-     135
-    ],
-    [
-     "Kesar Penda",
-     155
-    ],
-    [
-     "Anjeer Barfi",
-     155
-    ],
-    [
-     "Elichi Shrikhand",
-     65
-    ],
-    [
-     "Kesar Shrikhand",
-     70
-    ],
-    [
-     "Mango Mattho",
-     75
-    ],
-    [
-     "Dryfruit Shrikhand",
-     85
-    ]
-   ]
-  },
-  {
-   "name": "Ice Cream",
-   "unit": "",
-   "items": [
-    [
-     "Ice Cream",
-     10
-    ]
-   ]
+   ],
+   "small": "250 g"
   }
- ]
+ ],
+ "rule": "Item = [name, rate, 250g override (omit/null), unit]. 250 g rate = kg rate / 4 + 5, rounded up, only for categories that have a 'small' label."
 }
