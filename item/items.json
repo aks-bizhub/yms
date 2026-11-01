@@ -1,0 +1,365 @@
+{
+ "shop": "Yogesh Milk & Sweet",
+ "place": "Dabhoi",
+ "updated": "2026-11-01",
+ "categories": [
+  {
+   "name": "Milk & Curd",
+   "unit": "",
+   "items": [
+    [
+     "Milk B",
+     70
+    ],
+    [
+     "Milk C",
+     54
+    ],
+    [
+     "Hot Milk",
+     72
+    ],
+    [
+     "Dahi",
+     90
+    ],
+    [
+     "Chhash",
+     10
+    ]
+   ]
+  },
+  {
+   "name": "Paneer, Butter & Ghee",
+   "unit": "kg",
+   "items": [
+    [
+     "Paneer",
+     440
+    ],
+    [
+     "Butter",
+     700
+    ],
+    [
+     "Cream",
+     380
+    ],
+    [
+     "Ghee",
+     760
+    ],
+    [
+     "Cow Ghee",
+     840
+    ]
+   ]
+  },
+  {
+   "name": "Basundi, Mava & Ras",
+   "unit": "kg",
+   "items": [
+    [
+     "Basundi",
+     340
+    ],
+    [
+     "Kesar Basundi",
+     400
+    ],
+    [
+     "Ras",
+     125
+    ],
+    [
+     "Mava",
+     340
+    ],
+    [
+     "Mava Mix",
+     520
+    ]
+   ]
+  },
+  {
+   "name": "Shrikhand",
+   "unit": "kg",
+   "items": [
+    [
+     "Elichi Shrikhand",
+     240
+    ],
+    [
+     "Kesar Shrikhand",
+     260
+    ],
+    [
+     "Mango Mattho",
+     280
+    ],
+    [
+     "Chocolate Shrikhand",
+     280
+    ],
+    [
+     "Butter Scotch",
+     220
+    ],
+    [
+     "Fruit Mattho",
+     300
+    ],
+    [
+     "Dryfruit Shrikhand",
+     320
+    ],
+    [
+     "American Dryfruit Shrikhand",
+     320
+    ],
+    [
+     "Rajbhog Shrikhand",
+     320
+    ]
+   ]
+  },
+  {
+   "name": "Penda",
+   "unit": "kg",
+   "items": [
+    [
+     "Mathura Penda",
+     440
+    ],
+    [
+     "Malai Penda",
+     460
+    ],
+    [
+     "Chocolate Penda",
+     520
+    ],
+    [
+     "Badami Penda",
+     520
+    ],
+    [
+     "Kesar Penda",
+     600
+    ]
+   ]
+  },
+  {
+   "name": "Traditional Sweets",
+   "unit": "kg",
+   "items": [
+    [
+     "Bundi",
+     220
+    ],
+    [
+     "Bundi Ladu",
+     240
+    ],
+    [
+     "Gulab Jamun",
+     260
+    ],
+    [
+     "Motichoor Ladoo",
+     360
+    ],
+    [
+     "Kala Jamun",
+     400
+    ],
+    [
+     "Maysur",
+     440
+    ],
+    [
+     "Magas",
+     460
+    ],
+    [
+     "Milk Cake",
+     500
+    ],
+    [
+     "Mohanthar",
+     500
+    ],
+    [
+     "Kesar Modak",
+     640
+    ]
+   ]
+  },
+  {
+   "name": "Barfi & Halwa",
+   "unit": "kg",
+   "items": [
+    [
+     "Dudhi Halwa",
+     440
+    ],
+    [
+     "Gajar Halwa",
+     480
+    ],
+    [
+     "Malai Barfi",
+     500
+    ],
+    [
+     "Mango Barfi",
+     500
+    ],
+    [
+     "Chocolate Barfi",
+     500
+    ],
+    [
+     "Kopra Pak",
+     500
+    ],
+    [
+     "Anjeer Barfi",
+     600
+    ]
+   ]
+  },
+  {
+   "name": "Kaju Sweets",
+   "unit": "kg",
+   "items": [
+    [
+     "Kaju Katli",
+     1100
+    ],
+    [
+     "Kesar Kaju Katli",
+     1200
+    ],
+    [
+     "Badam Katli",
+     1200
+    ],
+    [
+     "Anjeer Katli",
+     1200
+    ],
+    [
+     "Kesar Kaju Roll",
+     1200
+    ],
+    [
+     "Kaju Mix",
+     1200
+    ],
+    [
+     "Anjeer Kaju Roll",
+     1300
+    ]
+   ]
+  },
+  {
+   "name": "Mix Mithai",
+   "unit": "kg",
+   "items": [
+    [
+     "Mixed Mithai",
+     500
+    ],
+    [
+     "Special Mix",
+     600
+    ]
+   ]
+  },
+  {
+   "name": "250 g Packs",
+   "unit": "250 g",
+   "items": [
+    [
+     "Gulab Jamun",
+     70
+    ],
+    [
+     "Motichoor",
+     95
+    ],
+    [
+     "Kala Jamun",
+     105
+    ],
+    [
+     "Mathura Penda",
+     115
+    ],
+    [
+     "Malai Penda",
+     120
+    ],
+    [
+     "Sweet (64)",
+     120
+    ],
+    [
+     "Mix Mithai",
+     125
+    ],
+    [
+     "Sweet (67)",
+     125
+    ],
+    [
+     "Barfi",
+     130
+    ],
+    [
+     "Badami Penda",
+     135
+    ],
+    [
+     "Chocolate Penda",
+     135
+    ],
+    [
+     "Kesar Penda",
+     155
+    ],
+    [
+     "Anjeer Barfi",
+     155
+    ],
+    [
+     "Elichi Shrikhand",
+     65
+    ],
+    [
+     "Kesar Shrikhand",
+     70
+    ],
+    [
+     "Mango Mattho",
+     75
+    ],
+    [
+     "Dryfruit Shrikhand",
+     85
+    ]
+   ]
+  },
+  {
+   "name": "Ice Cream",
+   "unit": "",
+   "items": [
+    [
+     "Ice Cream",
+     10
+    ]
+   ]
+  }
+ ]
+}
