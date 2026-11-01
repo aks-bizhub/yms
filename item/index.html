@@ -2,51 +2,80 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Yogesh Milk & Sweet – Item Catalog, Dabhoi</title>
 <meta name="theme-color" content="#7a1f2b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Hind:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#fbf5ea; --card:#fffdf8; --ink:#2b1a14; --muted:#7b6a60;
-  --brand:#7a1f2b; --brand-ink:#fff; --saffron:#e08a12; --line:#eadfcc;
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#1d1412; --card:#291c19; --ink:#f6eadb; --muted:#b9a698;
-    --brand:#e8a33d; --brand-ink:#2b1a14; --saffron:#e8a33d; --line:#40302b;
-  }
-}
+:root{--bg:#fbf5ea;--card:#fffdf8;--ink:#2b1a14;--muted:#7b6a60;--brand:#7a1f2b;--brand-ink:#fff;--saffron:#e08a12;--line:#eadfcc;--tint:rgba(122,31,43,.07)}
+@media (prefers-color-scheme:dark){:root{--bg:#1d1412;--card:#291c19;--ink:#f6eadb;--muted:#b9a698;--brand:#e8a33d;--brand-ink:#2b1a14;--saffron:#e8a33d;--line:#40302b;--tint:rgba(232,163,61,.1)}}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:128px}
+html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Hind,system-ui,sans-serif;font-size:16px;line-height:1.4}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--saffron);outline-offset:2px}
 header{background:#7a1f2b;color:#fff3dc;padding:28px 18px 22px;text-align:center}
-header h1{font-family:Fraunces,Georgia,serif;font-weight:800;font-size:clamp(26px,7vw,38px);margin:0;letter-spacing:.2px}
+header h1{font-family:Fraunces,Georgia,serif;font-weight:800;font-size:clamp(26px,7vw,38px);margin:0}
 header p{margin:6px 0 0;opacity:.85;font-size:15px}
 .bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 14px 8px;border-bottom:1px solid var(--line)}
 .search{width:100%;padding:11px 14px;font:inherit;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
-.search:focus{outline:2px solid var(--saffron);outline-offset:1px}
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex:none;padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
-.tab:focus-visible{outline:2px solid var(--saffron)}
+.tab{flex:none;padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-size:14px}
 .tab.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
-main{max-width:720px;margin:0 auto;padding:6px 14px 40px}
+main{max-width:720px;margin:0 auto;padding:6px 14px 110px}
 section{margin-top:22px}
-h2{font-family:Fraunces,Georgia,serif;font-size:22px;margin:0 0 8px;display:flex;align-items:baseline;gap:10px}
-h2 small{font-family:Hind,sans-serif;font-weight:500;font-size:14px;color:var(--muted)}
-ul{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:12px}
-li{display:flex;align-items:baseline;gap:8px;padding:11px 14px}
+h2{font-family:Fraunces,Georgia,serif;font-size:22px;margin:0 0 8px}
+ul{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 li+li{border-top:1px solid var(--line)}
-.n{flex:none}
-.dots{flex:1;border-bottom:2px dotted var(--line);transform:translateY(-4px);min-width:12px}
-.p{flex:none;font-weight:600;font-variant-numeric:tabular-nums}
-.p i{font-style:normal;font-weight:400;color:var(--muted);font-size:13px}
+.row,.hd{display:flex;align-items:center;gap:8px;width:100%;padding:11px 12px 11px 14px}
+.row{background:none;border:0;text-align:left}
+.row:active{background:var(--tint)}
+.hd{padding-top:8px;padding-bottom:8px;font-size:13px;color:var(--muted);background:var(--tint)}
+.n{flex:1;min-width:0}
+.p{flex:none;width:68px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.p.s{color:var(--muted);font-weight:500}
+.hd .p{font-weight:500}
+.plus{flex:none;width:30px;height:30px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-size:20px;line-height:1}
+.hd .plus{background:none}
 .empty{text-align:center;color:var(--muted);padding:40px 0}
-footer{text-align:center;color:var(--muted);font-size:13px;padding:0 18px 34px}
-footer b{color:var(--ink)}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:0 18px 110px}
+
+#cartbar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--brand);color:var(--brand-ink);display:none;align-items:center;justify-content:space-between;gap:12px;border:0;width:100%;text-align:left}
+#cartbar.show{display:flex}
+#cartbar b{font-size:18px}
+#cartbar span:last-child{font-weight:600}
+
+.ov{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center}
+.ov.show{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.sheet h3{font-family:Fraunces,Georgia,serif;font-size:22px;margin:0 0 2px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+.seg{display:flex;gap:6px;margin-bottom:14px}
+.seg button{flex:1;padding:9px 6px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);font-size:14px}
+.seg button.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--card)}
+.in{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.in input{flex:1;min-width:0;padding:12px;font:inherit;font-size:20px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.in span{color:var(--muted)}
+.step{display:flex;align-items:center;justify-content:center;gap:18px;margin:6px 0 14px}
+.step button{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);font-size:26px}
+.step output{min-width:52px;text-align:center;font-size:30px;font-weight:600}
+.sum{margin:12px 0;padding:10px 12px;border-radius:10px;background:var(--tint);display:flex;justify-content:space-between;gap:10px}
+.sum b{font-size:20px}
+.cta{width:100%;padding:14px;border-radius:12px;border:0;background:var(--brand);color:var(--brand-ink);font-weight:600;font-size:17px}
+.cta:disabled{opacity:.4}
+.ghost{padding:12px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);flex:1}
+.lines{list-style:none;margin:10px 0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.lines li{display:flex;gap:10px;align-items:center;padding:10px 12px}
+.lines .n small{display:block;color:var(--muted)}
+.x{flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);background:none}
+.tot{display:flex;justify-content:space-between;align-items:baseline;font-size:22px;margin:12px 2px}
+.acts{display:flex;gap:8px}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
 </style>
 </head>
 <body>
@@ -61,24 +90,60 @@ footer b{color:var(--ink)}
 <main id="list"></main>
 <footer>Prices in ₹ and may change. <span id="upd"></span></footer>
 
-<script>
-// Fallback data (used if items.json cannot be loaded). Keep in sync with items.json.
-var FALLBACK = {"shop": "Yogesh Milk & Sweet", "place": "Dabhoi", "updated": "2026-11-01", "categories": [{"name": "Milk & Curd", "unit": "", "items": [["Milk B", 70], ["Milk C", 54], ["Hot Milk", 72], ["Dahi", 90], ["Chhash", 10]]}, {"name": "Paneer, Butter & Ghee", "unit": "kg", "items": [["Paneer", 440], ["Butter", 700], ["Cream", 380], ["Ghee", 760], ["Cow Ghee", 840]]}, {"name": "Basundi, Mava & Ras", "unit": "kg", "items": [["Basundi", 340], ["Kesar Basundi", 400], ["Ras", 125], ["Mava", 340], ["Mava Mix", 520]]}, {"name": "Shrikhand", "unit": "kg", "items": [["Elichi Shrikhand", 240], ["Kesar Shrikhand", 260], ["Mango Mattho", 280], ["Chocolate Shrikhand", 280], ["Butter Scotch", 220], ["Fruit Mattho", 300], ["Dryfruit Shrikhand", 320], ["American Dryfruit Shrikhand", 320], ["Rajbhog Shrikhand", 320]]}, {"name": "Penda", "unit": "kg", "items": [["Mathura Penda", 440], ["Malai Penda", 460], ["Chocolate Penda", 520], ["Badami Penda", 520], ["Kesar Penda", 600]]}, {"name": "Traditional Sweets", "unit": "kg", "items": [["Bundi", 220], ["Bundi Ladu", 240], ["Gulab Jamun", 260], ["Motichoor Ladoo", 360], ["Kala Jamun", 400], ["Maysur", 440], ["Magas", 460], ["Milk Cake", 500], ["Mohanthar", 500], ["Kesar Modak", 640]]}, {"name": "Barfi & Halwa", "unit": "kg", "items": [["Dudhi Halwa", 440], ["Gajar Halwa", 480], ["Malai Barfi", 500], ["Mango Barfi", 500], ["Chocolate Barfi", 500], ["Kopra Pak", 500], ["Anjeer Barfi", 600]]}, {"name": "Kaju Sweets", "unit": "kg", "items": [["Kaju Katli", 1100], ["Kesar Kaju Katli", 1200], ["Badam Katli", 1200], ["Anjeer Katli", 1200], ["Kesar Kaju Roll", 1200], ["Kaju Mix", 1200], ["Anjeer Kaju Roll", 1300]]}, {"name": "Mix Mithai", "unit": "kg", "items": [["Mixed Mithai", 500], ["Special Mix", 600]]}, {"name": "250 g Packs", "unit": "250 g", "items": [["Gulab Jamun", 70], ["Motichoor", 95], ["Kala Jamun", 105], ["Mathura Penda", 115], ["Malai Penda", 120], ["Sweet (64)", 120], ["Mix Mithai", 125], ["Sweet (67)", 125], ["Barfi", 130], ["Badami Penda", 135], ["Chocolate Penda", 135], ["Kesar Penda", 155], ["Anjeer Barfi", 155], ["Elichi Shrikhand", 65], ["Kesar Shrikhand", 70], ["Mango Mattho", 75], ["Dryfruit Shrikhand", 85]]}, {"name": "Ice Cream", "unit": "", "items": [["Ice Cream", 10]]}]};
+<button id="cartbar" type="button"><span><b id="cn">0</b> items</span><span id="ct">₹0 · View bill</span></button>
+<div class="ov" id="ov-add"><div class="sheet" id="add" role="dialog" aria-modal="true"></div></div>
+<div class="ov" id="ov-bill"><div class="sheet" id="bill" role="dialog" aria-modal="true"></div></div>
 
-var DATA = null, active = "All";
+<script>
+var FALLBACK = {"shop": "Yogesh Milk & Sweet", "place": "Dabhoi", "updated": "2026-11-01", "categories": [{"name": "Milk & Curd", "unit": "kg / Ltr", "items": [["Milk B", 70, null, "Ltr"], ["Milk C", 54, null, "Ltr"], ["Hot Milk", 72, null, "Ltr"], ["Dahi", 90, null, "kg"], ["Chhash", 10, null, "glass"]]}, {"name": "Paneer, Butter & Ghee", "unit": "kg", "items": [["Paneer", 440], ["Butter", 700], ["Cream", 380], ["Ghee", 760], ["Cow Ghee", 840]]}, {"name": "Basundi, Mava & Ras", "unit": "kg", "items": [["Basundi", 340], ["Kesar Basundi", 400], ["Ras", 125], ["Mava", 340], ["Mava Mix", 520]], "small": "250 g"}, {"name": "Shrikhand", "unit": "kg", "items": [["Elichi Shrikhand", 240], ["Kesar Shrikhand", 260], ["Mango Mattho", 280], ["Chocolate Shrikhand", 280], ["Butter Scotch", 220], ["Fruit Mattho", 300], ["Dryfruit Shrikhand", 320], ["American Dryfruit Shrikhand", 320], ["Rajbhog Shrikhand", 320]], "small": "250 g"}, {"name": "Penda", "unit": "kg", "items": [["Mathura Penda", 440], ["Malai Penda", 460], ["Chocolate Penda", 520], ["Badami Penda", 520], ["Kesar Penda", 600]], "small": "250 g"}, {"name": "Traditional Sweets", "unit": "kg", "items": [["Bundi", 220], ["Bundi Ladu", 240], ["Gulab Jamun", 260], ["Motichoor Ladoo", 360], ["Kala Jamun", 400], ["Maysur", 440], ["Magas", 460], ["Milk Cake", 500], ["Mohanthar", 500], ["Kesar Modak", 640]], "small": "250 g"}, {"name": "Barfi & Halwa", "unit": "kg", "items": [["Dudhi Halwa", 440], ["Gajar Halwa", 480], ["Malai Barfi", 500], ["Mango Barfi", 500], ["Chocolate Barfi", 500], ["Kopra Pak", 500], ["Anjeer Barfi", 600]], "small": "250 g"}, {"name": "Kaju Sweets", "unit": "kg", "items": [["Kaju Katli", 1100], ["Kesar Kaju Katli", 1200], ["Badam Katli", 1200], ["Anjeer Katli", 1200], ["Kesar Kaju Roll", 1200], ["Kaju Mix", 1200], ["Anjeer Kaju Roll", 1300]], "small": "250 g"}, {"name": "Mix Mithai", "unit": "kg", "items": [["Mixed Mithai", 500], ["Special Mix", 600]], "small": "250 g"}], "rule": "Item = [name, rate, 250g override (omit/null), unit]. 250 g rate = kg rate / 4 + 5, rounded up, only for categories that have a 'small' label."};
+var DATA = null, active = "All", cart = [], A = null;
 var $ = function(id){ return document.getElementById(id); };
 var esc = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+var t = function(n){ return String(Math.round(n * 100) / 100); };
+var money = function(n){ return "₹" + t(n); };
 
+try { cart = JSON.parse(localStorage.getItem("yms_cart") || "[]"); } catch (e) { cart = []; }
+function save(){ try { localStorage.setItem("yms_cart", JSON.stringify(cart)); } catch (e) {} }
+
+/* ---------- helpers ---------- */
+function unitOf(c, i){ return i[3] || c.unit; }
+function small(c, i){
+  if (!c.small) return null;
+  if (i.length > 2 && i[2] !== undefined && i[2] !== null) return i[2];
+  if (i.length > 2 && i[2] === null && i.length === 3) return null;
+  return Math.ceil(i[1] / 4 + 5);
+}
+function unitQ(q, u){
+  if (u === "kg") return q < 1 ? Math.round(q * 1000) + " g" : t(q) + " kg";
+  if (u === "Ltr") return q < 1 ? Math.round(q * 1000) + " ml" : t(q) + " Ltr";
+  return t(q) + " " + u;
+}
+function lineTotal(l){
+  if (l.mode === "qty") return l.val * l.rate;
+  if (l.mode === "amt") return l.val;
+  return l.val * l.small;
+}
+function lineSub(l){
+  if (l.mode === "qty") return unitQ(l.val, l.unit) + " × " + money(l.rate);
+  if (l.mode === "amt") return "≈ " + unitQ(l.val / l.rate, l.unit) + " at " + money(l.rate) + "/" + l.unit;
+  return l.val + (l.val > 1 ? " packets" : " packet") + " (250 g) × " + money(l.small);
+}
+function grand(){ return cart.reduce(function(s, l){ return s + lineTotal(l); }, 0); }
+
+/* ---------- catalog ---------- */
 function render(){
   var q = $("q").value.trim().toLowerCase(), html = "";
-  DATA.categories.forEach(function(c){
+  DATA.categories.forEach(function(c, ci){
     if (active !== "All" && active !== c.name) return;
-    var rows = c.items.filter(function(i){ return !q || i[0].toLowerCase().indexOf(q) > -1; });
+    var rows = [];
+    c.items.forEach(function(i, ii){ if (!q || i[0].toLowerCase().indexOf(q) > -1) rows.push(ii); });
     if (!rows.length) return;
-    html += '<section id="' + esc(c.name.replace(/\W+/g,"-")) + '"><h2>' + esc(c.name) +
-      (c.unit ? '<small>per ' + esc(c.unit) + '</small>' : '') + '</h2><ul>';
-    rows.forEach(function(i){
-      html += '<li><span class="n">' + esc(i[0]) + '</span><span class="dots"></span><span class="p">₹' + i[1] + '</span></li>';
+    html += '<section><h2>' + esc(c.name) + '</h2><ul><li class="hd"><span class="n"></span><span class="p">' + esc(c.unit) + '</span>' +
+      (c.small ? '<span class="p">' + esc(c.small) + '</span>' : '') + '<span class="plus"></span></li>';
+    rows.forEach(function(ii){
+      var i = c.items[ii], s = small(c, i);
+      html += '<li><button class="row" data-c="' + ci + '" data-i="' + ii + '"><span class="n">' + esc(i[0]) + '</span><span class="p">₹' + i[1] + '</span>' +
+        (c.small ? '<span class="p s">' + (s == null ? '–' : '₹' + s) + '</span>' : '') + '<span class="plus">+</span></button></li>';
     });
     html += '</ul></section>';
   });
@@ -87,7 +152,7 @@ function render(){
 
 function init(d){
   DATA = d;
-  $("shop").textContent = d.shop.replace("&","&");
+  $("shop").textContent = d.shop;
   $("place").textContent = d.place;
   document.title = d.shop + " – Item Catalog, " + d.place;
   if (d.updated) $("upd").textContent = "Updated " + d.updated + ".";
@@ -95,18 +160,107 @@ function init(d){
   $("tabs").innerHTML = names.map(function(n){
     return '<button class="tab' + (n === active ? ' on' : '') + '" data-n="' + esc(n) + '">' + esc(n) + '</button>';
   }).join("");
-  render();
+  render(); cartBar();
 }
 
+/* ---------- add sheet ---------- */
+function openAdd(ci, ii){
+  var c = DATA.categories[ci], i = c.items[ii], u = unitOf(c, i), s = small(c, i);
+  A = {c: c, i: i, name: i[0], rate: i[1], unit: u, small: s, mode: "qty", val: 1};
+  drawAdd(); $("ov-add").classList.add("show");
+}
+function chipsFor(u){ return (u === "kg" || u === "Ltr") ? [0.25, 0.5, 1, 2] : [1, 2, 3, 4]; }
+function drawAdd(){
+  var modes = [["qty", "By quantity"], ["amt", "By amount"]];
+  if (A.small != null) modes.push(["pack", "250 g packets"]);
+  var h = '<h3>' + esc(A.name) + '</h3><p class="sub">' + money(A.rate) + ' per ' + esc(A.unit) +
+    (A.small != null ? ' · ' + money(A.small) + ' per 250 g packet' : '') + '</p>';
+  h += '<div class="seg">' + modes.map(function(m){ return '<button data-m="' + m[0] + '" class="' + (A.mode === m[0] ? 'on' : '') + '">' + m[1] + '</button>'; }).join("") + '</div>';
+  if (A.mode === "qty"){
+    h += '<div class="chips">' + chipsFor(A.unit).map(function(v){ return '<button class="chip" data-v="' + v + '">' + unitQ(v, A.unit) + '</button>'; }).join("") + '</div>' +
+      '<div class="in"><input id="val" type="number" inputmode="decimal" min="0" step="any" value="' + A.val + '"><span>' + esc(A.unit) + '</span></div>';
+  } else if (A.mode === "amt"){
+    h += '<div class="chips">' + [50, 100, 200, 500].map(function(v){ return '<button class="chip" data-v="' + v + '">₹' + v + '</button>'; }).join("") + '</div>' +
+      '<div class="in"><span>₹</span><input id="val" type="number" inputmode="numeric" min="0" step="any" value="' + A.val + '"></div>';
+  } else {
+    h += '<div class="step"><button data-st="-1" aria-label="Less">−</button><output id="pv">' + A.val + '</output><button data-st="1" aria-label="More">+</button></div>' +
+      '<div class="chips" style="justify-content:center">' + [1, 2, 3, 4, 5].map(function(v){ return '<button class="chip" data-v="' + v + '">' + v + '</button>'; }).join("") + '</div>';
+  }
+  h += '<div class="sum"><span id="sl"></span><b id="st"></b></div><div class="acts"><button class="ghost" data-close="add">Cancel</button><button class="cta" id="addbtn" style="flex:2">Add to bill</button></div>';
+  $("add").innerHTML = h; sumAdd();
+}
+function sumAdd(){
+  var l = {mode: A.mode, val: A.val, rate: A.rate, small: A.small, unit: A.unit};
+  var ok = A.val > 0;
+  $("sl").textContent = ok ? lineSub(l) : "Enter a value";
+  $("st").textContent = ok ? money(lineTotal(l)) : "";
+  $("addbtn").disabled = !ok;
+  var pv = $("pv"); if (pv) pv.textContent = A.val;
+}
+function addLine(){
+  var k = A.c.name + "|" + A.name + "|" + A.mode, f = cart.filter(function(l){ return l.k === k; })[0];
+  if (f) f.val += A.val;
+  else cart.push({k: k, name: A.name, mode: A.mode, val: A.val, rate: A.rate, small: A.small, unit: A.unit});
+  save(); cartBar(); closeAll();
+}
+
+/* ---------- bill ---------- */
+function cartBar(){
+  var b = $("cartbar");
+  b.classList.toggle("show", cart.length > 0);
+  $("cn").textContent = cart.length;
+  $("ct").textContent = money(grand()) + " · View bill";
+}
+function drawBill(){
+  if (!cart.length){ closeAll(); return; }
+  var h = '<h3>Your bill</h3><ul class="lines">' + cart.map(function(l, n){
+    return '<li><span class="n">' + esc(l.name) + '<small>' + esc(lineSub(l)) + '</small></span><b>' + money(lineTotal(l)) + '</b><button class="x" data-rm="' + n + '" aria-label="Remove ' + esc(l.name) + '">×</button></li>';
+  }).join("") + '</ul><div class="tot"><span>Total</span><b>' + money(grand()) + '</b></div>' +
+  '<div class="acts"><button class="ghost" data-clear="1">Clear</button><button class="ghost" data-wa="1">Share on WhatsApp</button><button class="cta" data-close="bill" style="flex:1">Done</button></div>';
+  $("bill").innerHTML = h;
+}
+function share(){
+  var tx = "*" + DATA.shop + " – Bill*\n" + cart.map(function(l){ return "• " + l.name + " – " + lineSub(l) + " = " + money(lineTotal(l)); }).join("\n") + "\n*Total: " + money(grand()) + "*";
+  window.open("https://wa.me/?text=" + encodeURIComponent(tx), "_blank");
+}
+function closeAll(){ $("ov-add").classList.remove("show"); $("ov-bill").classList.remove("show"); }
+
+/* ---------- events ---------- */
 $("tabs").addEventListener("click", function(e){
   var b = e.target.closest(".tab"); if (!b) return;
   active = b.getAttribute("data-n");
-  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){ t.classList.toggle("on", t === b); });
-  render(); window.scrollTo({top:0});
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(x){ x.classList.toggle("on", x === b); });
+  render(); window.scrollTo({top: 0});
 });
 $("q").addEventListener("input", render);
+$("list").addEventListener("click", function(e){
+  var r = e.target.closest(".row"); if (r) openAdd(+r.dataset.c, +r.dataset.i);
+});
+$("cartbar").addEventListener("click", function(){ drawBill(); $("ov-bill").classList.add("show"); });
+$("add").addEventListener("click", function(e){
+  var el = e.target.closest("button"); if (!el) return;
+  if (el.dataset.m){ A.mode = el.dataset.m; A.val = A.mode === "amt" ? 100 : (A.mode === "pack" ? 1 : chipsFor(A.unit)[2]); drawAdd(); }
+  else if (el.dataset.v){ A.val = +el.dataset.v; if ($("val")) $("val").value = A.val; sumAdd(); }
+  else if (el.dataset.st){ A.val = Math.max(1, A.val + +el.dataset.st); sumAdd(); }
+  else if (el.dataset.close) closeAll();
+  else if (el.id === "addbtn") addLine();
+});
+$("add").addEventListener("input", function(e){
+  if (e.target.id === "val"){ A.val = parseFloat(e.target.value) || 0; sumAdd(); }
+});
+$("bill").addEventListener("click", function(e){
+  var el = e.target.closest("button"); if (!el) return;
+  if (el.dataset.rm){ cart.splice(+el.dataset.rm, 1); save(); cartBar(); drawBill(); }
+  else if (el.dataset.clear){ cart = []; save(); cartBar(); closeAll(); }
+  else if (el.dataset.wa) share();
+  else if (el.dataset.close) closeAll();
+});
+["ov-add", "ov-bill"].forEach(function(id){
+  $(id).addEventListener("click", function(e){ if (e.target === $(id)) closeAll(); });
+});
+document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeAll(); });
 
-// Fetch latest prices from items.json in the same GitHub repo
+/* ---------- load latest prices from items.json in the same repo ---------- */
 fetch("items.json?v=" + Date.now())
   .then(function(r){ if (!r.ok) throw 0; return r.json(); })
   .then(init)
