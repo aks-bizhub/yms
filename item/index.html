@@ -19,6 +19,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 header{background:#7a1f2b;color:#fff3dc;padding:28px 18px 22px;text-align:center}
 header h1{font-family:Fraunces,Georgia,serif;font-weight:800;font-size:clamp(26px,7vw,38px);margin:0}
 header p{margin:6px 0 0;opacity:.85;font-size:15px}
+header .tel{opacity:1}
+header .tel a{color:#fff3dc;font-weight:600;text-decoration:none}
 .bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 14px 8px;border-bottom:1px solid var(--line)}
 .search{width:100%;padding:11px 14px;font:inherit;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
@@ -82,6 +84,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:0 18px 110px}
 <header>
   <h1 id="shop">Yogesh Milk &amp; Sweet</h1>
   <p id="place">Dabhoi</p>
+  <p class="tel"><a href="tel:+919909146146">📞 +91 99091 46146</a></p>
 </header>
 <div class="bar">
   <input class="search" id="q" type="search" placeholder="Search item…" aria-label="Search item" autocomplete="off">
@@ -216,12 +219,12 @@ function drawBill(){
   var h = '<h3>Your bill</h3><ul class="lines">' + cart.map(function(l, n){
     return '<li><span class="n">' + esc(l.name) + '<small>' + esc(lineSub(l)) + '</small></span><b>' + money(lineTotal(l)) + '</b><button class="x" data-rm="' + n + '" aria-label="Remove ' + esc(l.name) + '">×</button></li>';
   }).join("") + '</ul><div class="tot"><span>Total</span><b>' + money(grand()) + '</b></div>' +
-  '<div class="acts"><button class="ghost" data-clear="1">Clear</button><button class="ghost" data-wa="1">Share on WhatsApp</button><button class="cta" data-close="bill" style="flex:1">Done</button></div>';
+  '<div class="acts"><button class="ghost" data-clear="1">Clear</button><button class="ghost" data-wa="1">Send order on WhatsApp</button><button class="cta" data-close="bill" style="flex:1">Done</button></div>';
   $("bill").innerHTML = h;
 }
 function share(){
   var tx = "*" + DATA.shop + " – Bill*\n" + cart.map(function(l){ return "• " + l.name + " – " + lineSub(l) + " = " + money(lineTotal(l)); }).join("\n") + "\n*Total: " + money(grand()) + "*";
-  window.open("https://wa.me/?text=" + encodeURIComponent(tx), "_blank");
+  window.open("https://wa.me/919909146146?text=" + encodeURIComponent(tx), "_blank");
 }
 function closeAll(){ $("ov-add").classList.remove("show"); $("ov-bill").classList.remove("show"); }
 
