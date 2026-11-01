@@ -260,12 +260,12 @@ $("bill").addEventListener("click", function(e){
 });
 document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeAll(); });
 
-/* ---------- load latest prices from items.json in the same repo ---------- */
-fetch("items.json?v=" + Date.now())
+/* ---------- load latest prices from data.json in the same repo ---------- */
+fetch("data.json?v=" + Date.now(), {cache: "no-store"})
   .then(function(r){ if (!r.ok) throw 0; return r.json(); })
   .then(init)
   .catch(function(){
-    if (FALLBACK) init(FALLBACK);
+    if (FALLBACK){ init(FALLBACK); $("upd").innerHTML = '<b style="color:#c0392b">Showing saved prices. Latest prices could not be loaded.</b>'; }
     else $("list").innerHTML = '<p class="empty">Could not load the catalog. Please check your internet and refresh.</p>';
   });
 </script>
