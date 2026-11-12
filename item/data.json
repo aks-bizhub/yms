@@ -9,33 +9,33 @@
    "items": [
     [
      "Milk B",
-     70,
+     74,
      null,
      "Ltr"
     ],
     [
      "Milk C",
-     54,
+     60,
      null,
      "Ltr"
     ],
     [
      "Hot Milk",
-     72,
+     76,
      null,
      "Ltr"
     ],
     [
      "Dahi",
-     90,
+     94,
      null,
      "kg"
     ],
     [
      "Chhash",
-     10,
+     30,
      null,
-     "glass"
+     "Ltr"
     ]
    ]
   },
